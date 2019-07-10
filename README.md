@@ -29,6 +29,8 @@ The NB-IoT board is a rich board that can be used for a variety of smart and 5G 
 
 -Tools: Different tools inclduing Quectel QNavigator that can be used with the BG96 wireless modem.
 
+- Arduino Sketches: Several examples and sketches for Arduino to use with the board
+
 # How to Use Arduino IDE with the Board
 
 1.	Install Arduino IDE for Windows from the following web site:
@@ -40,5 +42,7 @@ https://raw.githubusercontent.com/5ghub/5G-NB-IoT/master/package_5G-NB-IoT_index
 3.	In Arduino IDE, choose Tools->Boards Manager and install “5G-NB-IoT SAMD Boards”.
 
 4.	Choose “5G NB-IoT (Native USB Port)”
- 
-5.	You are ready now to use the Arduino IDE and write the first sketch.
+
+5. In the Arduino IDE, Choose Sketch->Include Library->Add .Zip Library and select the file 5G-NB-IoT_Arduino.zip 
+
+6.	You are ready now to use the Arduino IDE and write the first sketch.
