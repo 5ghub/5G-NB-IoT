@@ -43,12 +43,10 @@ char LOGIN[] = "gdata";
 char PASSWORD[] = "gdata";
 #endif
 
-char tcp_ip[] = "mbed.org";
-int tcp_port = 80;
-char send_data[] = "GET /media/uploads/mbed_official/hello.txt HTTP/1.0\r\n\r\n";
-unsigned int comm_pdp_index = 2;  // The range is 1 ~ 16
+char tcp_ip[] = "ec2-54-191-27-244.us-west-2.compute.amazonaws.com"; //"www.yahoo.com";
+unsigned int comm_pdp_index = 1;  // The range is 1 ~ 16
 unsigned int comm_socket_index = 2;  // The range is 0 ~ 11
-Socket_Type_t socket = TCP_CLIENT;
+unsigned int rssi;
 
 _5G_NB_IoT_TCPIP _5GNBIoT(ATSerial, DSerial);
 
@@ -77,46 +75,19 @@ void setup() {
     delay(1000);
   }
   DSerial.println(apn_error);
-
-  while (!_5GNBIoT.OpenSocketService(comm_pdp_index, comm_socket_index, socket, tcp_ip, tcp_port, 0, BUFFER_MODE)) {
-    DSerial.println("\r\nOpen Socket Service Fail!");
-  }
-  DSerial.println("\r\nOpen Socket Service Success!");
-
-  if (_5GNBIoT.SocketSendData(comm_socket_index, socket, send_data, "", tcp_port)) {
-    DSerial.println("\r\nSocket Send Data Success!");
-  }
 }
 
 void loop() {
-  char m_event[16];
-  unsigned int index;
-  char recv_data[128];
-  Socket_Event_t ret = _5GNBIoT.WaitCheckSocketEvent(m_event, 2);
-  switch (ret)
-  {
-    case SOCKET_CLOSE_EVENT:
-      index = atoi(m_event);
-      if (_5GNBIoT.CloseSocketService(index)) {
-        DSerial.println("\r\nClose Socket Success!");
-      }
-      break;
-    case SOCKET_RECV_DATA_EVENT:
-      index = atoi(m_event);
-      if (_5GNBIoT.SocketRecvData(index, 128, socket, recv_data)) {
-        DSerial.println("\r\nSocket Recv Data Success!");
-        DSerial.println("");
-        DSerial.println(recv_data);
-        DSerial.println("");
-      }
-      break;
-    case SOCKET_PDP_DEACTIVATION_EVENT:
-      index = atoi(m_event);
-      if (_5GNBIoT.DeactivateDevAPN(index)) {
-        DSerial.println("\r\nPlease reconfigure APN!");
-      }
-      break;
-    default:
-      break;
+  _5GNBIoT.DevPingFunction(comm_socket_index, tcp_ip);
+
+  if (_5GNBIoT.GetDevNetSignalQuality(rssi)) {
+    int _rssi = 0;
+    if (rssi <= 31) {
+      _rssi = -113 + rssi * 2;
+
+      DSerial.print("\r\nRSSI = ");
+      DSerial.print(_rssi, DEC);
+      DSerial.print("dBm");
+    }
   }
 }
