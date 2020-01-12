@@ -20,7 +20,7 @@
 */
 #include <board.h>
 
-const int buttonPin = USER_BUT;     // User button, pin 0, PA11
+const int buttonPin = USER_BUTTON;
 int buttonState = 0;         // variable for reading the pushbutton status
 
 // the setup function runs once when you press reset or power the board

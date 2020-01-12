@@ -29,11 +29,9 @@ GNSS_Work_Mode_t mode = STAND_ALONE;
 
 _5G_NB_IoT_GNSS _5GNBIoT(ATSerial, DSerial);
 
-#define PIN_NUMBER    17
+#define PIN_NUMBER    16
+int allPins[] = {LED1, LED2, A0, A1, A2, A3, A4, A5, PA6, PA7, SS, MOSI, MISO, SCK, SDA, SCL };
 
-int allPins[] = {PIN_LED_RXL, PIN_LED_TXL, PIN_LED_13, PIN_A0, PIN_A1, PIN_A2, PIN_A3, PIN_A4,
-                 PIN_A5, 8, 9, 36, 35, 34, 37, 32, 33
-                };
 
 // LEDs
 
