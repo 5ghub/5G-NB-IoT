@@ -19,7 +19,7 @@
 
 */
 
-#include "5G-NB-IoT_MQTT.h"
+#include <board.h>
 
 //#define DSerial Serial
 #define DSerial SerialUSB
@@ -33,7 +33,7 @@ char LOGIN[] = "guest";
 char PASSWORD[] = "guest";
 #endif
 #ifdef ATT
-char APN[] = "phone";
+char APN[] = "m2mNB16.com.attz";
 char LOGIN[] = "";
 char PASSWORD[] = "";
 #endif

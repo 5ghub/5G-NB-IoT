@@ -19,8 +19,11 @@
 
 */
 
-#include <FreeRTOS_SAMD21.h>  // https://github.com/BriscoeTech/Arduino-FreeRTOS-SAMD21
-#include "5G-NB-IoT_TCPIP.h"
+#include <board.h>
+
+// Download FreeRTOS zip library file from https://github.com/BriscoeTech/Arduino-FreeRTOS-SAMD21
+// Install the library using Library Manager
+#include <FreeRTOS_SAMD21.h>  
 
 //#define DSerial Serial
 #define DSerial SerialUSB
@@ -34,7 +37,7 @@ char LOGIN[] = "guest";
 char PASSWORD[] = "guest";
 #endif
 #ifdef ATT
-char APN[] = "m2mNB16.com.attz";
+char APN[] = "phone";
 char LOGIN[] = "";
 char PASSWORD[] = "";
 #endif

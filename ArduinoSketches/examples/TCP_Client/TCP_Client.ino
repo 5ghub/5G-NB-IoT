@@ -18,8 +18,7 @@
   IN THE SOFTWARE.
 
 */
-
-#include "5G-NB-IoT_TCPIP.h"
+#include <board.h>
 
 //#define DSerial Serial
 #define DSerial SerialUSB
@@ -46,8 +45,8 @@ char PASSWORD[] = "gdata";
 char tcp_ip[] = "mbed.org";
 int tcp_port = 80;
 char send_data[] = "GET /media/uploads/mbed_official/hello.txt HTTP/1.0\r\n\r\n";
-unsigned int comm_pdp_index = 2;  // The range is 1 ~ 16
-unsigned int comm_socket_index = 2;  // The range is 0 ~ 11
+unsigned int comm_pdp_index = 1;  // The range is 1 ~ 16
+unsigned int comm_socket_index = 1;  // The range is 0 ~ 11
 Socket_Type_t socket = TCP_CLIENT;
 
 _5G_NB_IoT_TCPIP _5GNBIoT(ATSerial, DSerial);

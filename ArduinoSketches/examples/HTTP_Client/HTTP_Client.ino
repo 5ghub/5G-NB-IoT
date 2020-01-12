@@ -19,7 +19,7 @@
 
 */
 
-#include "5G-NB-IoT_HTTP.h"
+#include <board.h>
 
 //#define DSerial Serial
 #define DSerial SerialUSB

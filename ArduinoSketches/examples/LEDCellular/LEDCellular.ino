@@ -19,15 +19,13 @@
 
 */
 
-#include "5G-NB-IoT_GNSS.h"
+#include <board.h>
 
 //#define DSerial Serial
 #define DSerial SerialUSB
 #define ATSerial Serial1
 
-GNSS_Work_Mode_t mode = STAND_ALONE;
-
-_5G_NB_IoT_GNSS _5GNBIoT(ATSerial, DSerial);
+_5G_NB_IoT_Common _5GNBIoT(ATSerial, DSerial);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -39,8 +37,8 @@ void setup() {
   while (ATSerial.read() >= 0);
   delay(1000);
 
-  pinMode(PIN_LED_RXL, OUTPUT);
-  pinMode(PIN_LED_TXL, OUTPUT);
+  pinMode(PIN_LED1, OUTPUT);
+  pinMode(PIN_LED2, OUTPUT);
 
   _5GNBIoT.InitModule();
   DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
@@ -48,10 +46,10 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(PIN_LED_RXL, LOW);
-  digitalWrite(PIN_LED_TXL, HIGH);
+  digitalWrite(PIN_LED1, LOW);
+  digitalWrite(PIN_LED2, HIGH);
   delay(500); // wait for a 5 second
-  digitalWrite(PIN_LED_RXL, HIGH);
-  digitalWrite(PIN_LED_TXL, LOW);
+  digitalWrite(PIN_LED1, HIGH);
+  digitalWrite(PIN_LED2, LOW);
   delay(500); // wait for a 5 second
 }
