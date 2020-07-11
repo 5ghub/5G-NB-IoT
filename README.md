@@ -39,7 +39,7 @@ https://www.arduino.cc/en/Main/Software
 2.	Launch Arduino IDE and choose File->Preferences. In the Additional Boards Manager URLs, insert the following URL:
 https://raw.githubusercontent.com/5ghub/5G-NB-IoT/master/package_5G-NB-IoT_index.json
 
-3.	In Arduino IDE, choose Tools->Boards Manager and install “5G-NB-IoT SAMD Boards”.
+3.	In Arduino IDE, choose Tools->Board->Boards Manager and install “5G-NB-IoT SAMD Boards”.
 
 4.	Choose “5G NB-IoT (Native USB Port)”
 
