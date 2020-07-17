@@ -14,7 +14,7 @@
 					"help": {
 						"online": "null"
 					},
-					https://raw.githubusercontent.com/5ghub/5G-NB-IoT/master/5G-NB-IoT.zip,
+					"url":"https://raw.githubusercontent.com/5ghub/5G-NB-IoT/master/5G-NB-IoT.zip",
 					"archiveFileName": "5G-NB-IoT.zip",
 					"checksum": "SHA-256:909c21945629d530379e732b9b4b16e128d3fc47a612433d0b25235d24057eed",
 					"size": "1106119",
