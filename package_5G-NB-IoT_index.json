@@ -7,7 +7,7 @@
       "name": "5G-NB-IoT",
       "platforms": [
 				{
-					"name": "5G-NB-IoT SAMD Boards (32-bits ARM Cortex-M0+)",
+					"name": "5G-NB-IoT SAMD Board (32-bits ARM Cortex-M0+)",
 					"architecture": "samd",
 					"version": "1.0.6",
 					"category": "Contributed",
