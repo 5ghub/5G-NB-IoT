@@ -17,7 +17,7 @@ The NB-IoT board is a rich board that can be used for a variety of smart and 5G 
 
 
 # Software and Tools Included with the Board
--ArduinoSketches: Contains different Arduino sketches to use with the board.
+-ArduinoSketches: Contains different Arduino examples and sketches to use with the board.
 
 -5G-NB-IoT_Arduino.zip: Contains the library (used with Arduino IDE).
 
@@ -27,9 +27,8 @@ The NB-IoT board is a rich board that can be used for a variety of smart and 5G 
 
 -Driver: Contains Windows driver for the BG96 chipset and the prolific USB-to-serial cable.
 
--Tools: Different tools inclduing Quectel QNavigator that can be used with the BG96 wireless modem.
+-Tools: Different tools inclduing Quectel QNavigator and QCOM that can be used with the BG96 wireless modem to communicate over USB or serial ports.
 
-- Arduino Sketches: Several examples and sketches for Arduino to use with the board
 
 # How to Use Arduino IDE with the Board
 
