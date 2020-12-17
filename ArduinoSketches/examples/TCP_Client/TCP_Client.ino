@@ -61,6 +61,7 @@ void setup() {
   delay(1000);
 
   _5GNBIoT.InitModule();
+  
   DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
 
   _5GNBIoT.SetDevCommandEcho(false);

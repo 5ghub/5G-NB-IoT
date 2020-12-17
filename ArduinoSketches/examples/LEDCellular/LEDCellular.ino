@@ -37,8 +37,8 @@ void setup() {
   while (ATSerial.read() >= 0);
   delay(1000);
 
-  pinMode(PIN_LED1, OUTPUT);
-  pinMode(PIN_LED2, OUTPUT);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
 
   _5GNBIoT.InitModule();
   DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
@@ -46,10 +46,10 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(PIN_LED1, LOW);
-  digitalWrite(PIN_LED2, HIGH);
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, HIGH);
   delay(500); // wait for a 5 second
-  digitalWrite(PIN_LED1, HIGH);
-  digitalWrite(PIN_LED2, LOW);
+  digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, LOW);
   delay(500); // wait for a 5 second
 }

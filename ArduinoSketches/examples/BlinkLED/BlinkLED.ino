@@ -18,19 +18,20 @@
 *IN THE SOFTWARE.
 *
 */
+#include <board.h>
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  pinMode(PIN_LED_RXL,OUTPUT);
-  pinMode(PIN_LED_TXL,OUTPUT);
+  pinMode(LED1,OUTPUT);
+  pinMode(LED2,OUTPUT);
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(PIN_LED_RXL,LOW);
-  digitalWrite(PIN_LED_TXL,HIGH);
+  digitalWrite(LED1,LOW);
+  digitalWrite(LED2,HIGH);
   delay(500); // wait for a 5 second
-  digitalWrite(PIN_LED_RXL,HIGH);
-  digitalWrite(PIN_LED_TXL,LOW);
+  digitalWrite(LED1,HIGH);
+  digitalWrite(LED2,LOW);
   delay(500); // wait for a 5 second
 }

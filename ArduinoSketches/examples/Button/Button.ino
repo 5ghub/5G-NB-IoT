@@ -25,8 +25,8 @@ int buttonState = 0;         // variable for reading the pushbutton status
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  pinMode(PIN_LED_RXL, OUTPUT);
-  pinMode(PIN_LED_TXL, OUTPUT);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
 }
@@ -39,16 +39,16 @@ void loop() {
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
   if (buttonState == LOW) {
     // turn LED on:
-    digitalWrite(PIN_LED_RXL, LOW);
-    digitalWrite(PIN_LED_TXL, LOW);
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);
     delay(500); // wait for a 0.5 second
-    digitalWrite(PIN_LED_RXL, HIGH);
-    digitalWrite(PIN_LED_TXL, HIGH);
+    digitalWrite(LED1, HIGH);
+    digitalWrite(LED2, HIGH);
     delay(500); // wait for a 0.5 second
-    digitalWrite(PIN_LED_RXL, LOW);
-    digitalWrite(PIN_LED_TXL, LOW);
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);
     delay(500); // wait for a 0.5 second
-    digitalWrite(PIN_LED_RXL, HIGH);
-    digitalWrite(PIN_LED_TXL, HIGH);
+    digitalWrite(LED1, HIGH);
+    digitalWrite(LED2, HIGH);
   }
 }
