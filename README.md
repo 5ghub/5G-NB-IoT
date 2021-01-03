@@ -27,6 +27,8 @@ The NB-IoT board is a rich board that can be used for a variety of smart and 5G 
 
 -Driver: Contains Windows driver for the BG96 chipset and the prolific USB-to-serial cable.
 
+-NBIoTPhone: Folder contains the Arduino sketches for the NB-IoT phone, LCD, Keypad, SD card, and BG96 modem.
+
 -Tools: Different tools inclduing Quectel QNavigator and QCOM that can be used with the BG96 wireless modem to communicate over USB or serial ports.
 
 
