@@ -1,1 +1,0 @@
-Please downlaod and install SdFat library from Arduino IDE->Manage Libraries ...-> and choose SdFat
