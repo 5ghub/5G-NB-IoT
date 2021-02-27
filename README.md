@@ -29,6 +29,8 @@ The NB-IoT board is a rich board that can be used for a variety of smart and 5G 
 
 -NBIoTPhone: Folder contains the Arduino sketches for the NB-IoT phone, LCD, Keypad, SD card, and BG96 modem.
 
+-kit Sketches: Folder contains more Arduino sketches for the NB-IoT & GNSS kit. Each lesson has the circuit digram in Fritzing and library.
+
 -Tools: Different tools inclduing Quectel QNavigator and QCOM that can be used with the BG96 wireless modem to communicate over USB or serial ports.
 
 
