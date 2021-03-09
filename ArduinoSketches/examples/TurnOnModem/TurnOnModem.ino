@@ -25,10 +25,18 @@
 #define DSerial SerialUSB
 #define ATSerial Serial1
 
-_5G_NB_IoT_Common _5GNBIoT(ATSerial, DSerial);
+// Global SIM APN
+char APN[] = "super";
+
+// AT&T APN
+//char APN[] = "m2mNB16.com.attz";
+unsigned int comm_pdp_index = 1;  // The range is 1 ~ 16
+
+_5G_NB_IoT_TCPIP _5GNBIoT(ATSerial, DSerial);
 
 // the setup function runs once when you press reset or power the board
-void setup() {
+void setup() 
+{
   DSerial.begin(115200);
   while (DSerial.read() >= 0);
   DSerial.println("This is the _5GNBIoT Debug Serial!");
@@ -42,10 +50,19 @@ void setup() {
 
   _5GNBIoT.InitModule();
   DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
+
+  char apn_error[64];
+  while(!_5GNBIoT.InitAPN(comm_pdp_index, APN, "", "", apn_error))
+  {
+    DSerial.println(apn_error);
+    delay(1000);
+  }  
+  DSerial.println(apn_error);
 }
 
 // the loop function runs over and over again forever
-void loop() {
+void loop() 
+{
   digitalWrite(LED1, LOW);
   digitalWrite(LED2, HIGH);
   delay(500); // wait for a 5 second
