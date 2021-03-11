@@ -56,7 +56,7 @@
 				"architecture": "imxrt",
 				"category": "Contributed",
 				"version": "1.0.0",
-				"url": "https://raw.githubusercontent.com/5ghub/Internal/master/RT1062/ArduinoCore-imxrt.zip",
+				"url": "https://raw.githubusercontent.com/slavaten/rt1062/blob/master/RT1062/ArduinoCore-imxrt.zip",				
 				"archiveFileName": "ArduinoCore-imxrt.zip",
 				"checksum": "SHA-256:82D07EFA47F1D4B79A2063D8F832FEBEB0A70623B7AB54085525CF1201794F32",
 				"size": "29576686",
