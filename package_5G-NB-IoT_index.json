@@ -64,12 +64,12 @@
 					"name": "5G-NB RT1060"
 				}],
 				"toolsDependencies": [{
-						"packager": "5G-NB",
+						"packager": "Seeeduino",
 						"version": "7-2017q4",
 						"name": "arm-none-eabi-gcc"
 					},
 					{
-						"packager": "5G-NB",
+						"packager": "Seeeduino",
 						"version": "1.9.1-seeeduino",
 						"name": "bossac"
 					}
