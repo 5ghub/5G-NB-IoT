@@ -49,6 +49,10 @@ void setup()
   while (ATSerial.read() >= 0);
   delay(1000);
 
+  //turn off two LEDs
+  digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, HIGH);
+
   /************************************************************************/
   /*                                                                      */
   /*                                                                      */
@@ -106,10 +110,6 @@ void setup()
   {
     pinMode(allPins[i], OUTPUT);
   }
-
-    //turn off two LEDs
-    digitalWrite(LED1, HIGH);
-    digitalWrite(LED1, HIGH);
 }
 
 // the loop function runs over and over again forever
@@ -133,13 +133,6 @@ void loop()
     digitalWrite(allPins[activepin], LOW);
   else
     digitalWrite(allPins[activepin], HIGH);
-
-
-  //Keep dispalying the registration status of the modem
-  if (_5GNBIoTCommon.DevNetRegistrationStatus() == Net_Status_t::REGISTERED)
-  {
-      DSerial.println("\r\n_REGISTERED!");
-  }
 
   delay(500); // wait for a 0.5 second
 }
