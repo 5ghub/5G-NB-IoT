@@ -45,11 +45,16 @@ void setup()
   while (ATSerial.read() >= 0);
   delay(1000);
 
+  _5GNBIoT.InitModule();
+  DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
+
+   // This must exist for miniPCIe card
+   // pinMode(RESET_N, OUTPUT);
+   // digitalWrite(RESET_N, HIGH);
+ 
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
 
-  _5GNBIoT.InitModule();
-  DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
 
   char apn_error[64];
   while(!_5GNBIoT.InitAPN(comm_pdp_index, APN, "", "", apn_error))

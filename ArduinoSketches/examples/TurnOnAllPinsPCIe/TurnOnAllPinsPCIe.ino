@@ -63,6 +63,10 @@ void setup()
   _5GNBIoT.InitModule();
   DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
 
+  // This must exist for miniPCIe card
+  // pinMode(RESET_N, OUTPUT);
+  // digitalWrite(RESET_N, HIGH);
+
   char apn_error[64];
   while(!_5GNBIoTTCPIP.InitAPN(comm_pdp_index, APN, "", "", apn_error))
   {
