@@ -42,15 +42,14 @@ void setup()
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
 
-//  digitalWrite(LED1, HIGH);
-//  digitalWrite(LED2, HIGH);
+ // This is UART #1   
+  Serial.println("This is the Serial #1");
+
 }
 
+
 void loop() 
-{
-  // This is UART #1   
-  Serial.println("This is the Serial #1");
-  
+{ 
   if (Serial.available() > 0) 
   {
     // read the incoming byte:
