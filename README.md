@@ -1,6 +1,7 @@
 # 5G-NB-IoT Kit
 
-The NB-IoT kit is a cellular and GPS kit that can be used for the new 5G wireless technology. The kit includes a hardware board, LTE&GPS antenna, and USB cables. 
+The NB-IoT kit is a cellular and GPS kit that can be used for the new 5G wireless technology. The kit includes a hardware board, LTE&GPS antenna, and USB cables. This kit is available here:
+https://5ghub.us/product/lte-narrowband-internet-of-things-nb-iot-and-global-navigation-satellite-system-gnss-kit-with-ltegps-antenna-arduino-and-freertos-compatible/
 
 The hardware board is a powerful board that features a microcontroller and a wireless modem. The microcontroller is an Atmel’s SAMD21G18A MCU which features a 32-bit ARM Cortex® M0+ core. The wireless modem is Quectel BG96 which is an embedded IoT (LTE Cat-M1, LTE Cat-NB1 and EGPRS) wireless communication modem. BG96 wireless modem provides a maximum data rate of 375Kbps downlink and 375Kbps uplink. It features ultra-low power consumption, provides data connectivity on LTE-TDD/LTE-FDD/GPRS/EDGE networks, and supports half-duplex operation in LTE networks. It also provides GNSS to meet customers’ specific application demands. 
 
