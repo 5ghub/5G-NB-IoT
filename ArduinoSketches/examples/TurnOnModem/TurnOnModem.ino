@@ -42,8 +42,8 @@ void setup()
   DSerial.println("\r\n_5GNBIoT.InitModule() OK!");
 
    // This must exist for miniPCIe card
-   // pinMode(RESET_N, OUTPUT);
-   // digitalWrite(RESET_N, HIGH);
+   //pinMode(RESET_N, OUTPUT);
+   //digitalWrite(RESET_N, HIGH);
  
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
