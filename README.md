@@ -18,7 +18,7 @@ The board supports Windows 7/8/8.1/10, Linux and Android.
 The NB-IoT board is a rich board that can be used for a variety of smart and 5G applications. It enables applications such as wireless POS, smart metering, tracking, smart transportation, smart buildings, smart city, and smart homes, navigation, location, and tracking. 
 
 # Arduino IDE Compatibiltiy
-This Repository is compatible with Arduino IDE 1.8.13
+This Repository is compatible with Arduino IDE 2.1.1
 
 # Software and Tools Included with the Board
 -ArduinoSketches: Contains different Arduino examples and sketches to use with the board.
