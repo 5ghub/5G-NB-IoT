@@ -32,6 +32,7 @@ This Repository is compatible with Arduino IDE 2.1.1
 -Driver: Contains Windows driver for the BG96 chipset and the prolific USB-to-serial cable.
 
 -NBIoTPhone: Folder contains the Arduino sketches for the NB-IoT phone, LCD, Keypad, SD card, and BG96 modem.
+*IMPORTANT*: For the NBIoTPhone, there is a file UserSetup.h, make sure to take this file and replace it in the TFT_eSPI library
 
 -kit sketches: Folder contains more Arduino sketches for the NB-IoT & GNSS kit. Each lesson has the circuit digram in Fritzing and library. You can download Fritzing tool from https://fritzing.org/
 
