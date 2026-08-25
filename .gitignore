@@ -6,3 +6,8 @@ compile_report_127_PASS.csv
 # Local convenience copy of dependency zips that already live beside their
 # sketches -- do not commit (~10 MB of duplicates)
 libs/
+
+# Local-only checklist generator; kept out of the published repo. Each N/A row
+# in TESTING_CHECKLIST.md carries its own quoted compiler error, so the results
+# stay verifiable without it.
+scripts/build-checklist.py

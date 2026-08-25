@@ -73,8 +73,8 @@ Every sketch this repo owns — `ArduinoSketches` (20), `KitSketches` (30),
 
 Reaching it required **7 fixes, none of which were caused by the IDE upgrade** —
 every one was a latent pre-existing bug that would have failed identically on
-2.1.1. Total change to the repo: 5 files, and only 1 line each except the
-documented `Example12_UseUart` comment block.
+2.1.1. Total change to the repo: 9 files, +62 / -6 lines plus two repackaged zips —
+see the full delta table in TESTING_CHECKLIST.md.
 
 | # | Sketch | Issue | Fix |
 |---|--------|-------|-----|
@@ -100,12 +100,13 @@ classification is reproducible rather than hand-waved.
 
 | Reason | Count | Evidence |
 |---|---|---|
-| ESP32/ESP8266 only | ~31 | `FS.h`, `SPIFFS`, bare `<pgmspace.h>` (SAMD ships `<avr/pgmspace.h>`), `D8` |
+| ESP32/ESP8266 only | 35 | `FS.h`, `SPIFFS`, bare `<pgmspace.h>` (SAMD ships `<avr/pgmspace.h>`), `D8` |
 | AVR only | ~16 | `TCCR2A` (Timer2 registers), `dtostrf`, and two sketches with an explicit `#error This program is only for AVR` |
 | Exceeds SAMD21 memory / unsupported DMA | 6 | linker: `region RAM overflowed`, `FLASH overflowed by 19624 bytes`; TFT_eSPI DMA is implemented only for ESP32/STM32/RP2040 |
 | Broken upstream | 4 | `lfnTest`, `lfnTestCout`, `TestMkdir`, `TestRmdir` include `SdFatUtil.h`, a header **removed** from SdFat 1.1.4 -- confirmed absent from the zip |
 | Not example code | 6 | SdFat's `extras/SdFatTestSuite` harness (the board core's `SDU/extras/SDUBoot` was in this group until `FlashStorage` was installed — it now compiles) |
 | Other hardware libs | ~14 | Teensy (`IMXRT_board.h`, `SdFatSdio`), `WiFi101.h`, `epd2in7.h` (Waveshare e-paper), `I2Cdev.h`, display-specific `ILI9341_*`, TFT_eSPI `getTouch` (needs `TOUCH_CS`) |
+(35 + 16 + 6 + 4 + 6 + 14 = 81.)
 
 **Result: 203 / 203 in-scope zip sketches compile — zero failures.**
 
@@ -114,8 +115,8 @@ Getting there took 3 library installs and 1 code fix:
 | Was failing | Count | Resolution |
 |---|---|---|
 | `Rtc` name collision | 11 | **Fixed in `Rtc-master.zip`.** The SAMD21's CMSIS header defines `typedef struct {...} Rtc;` (`component/rtc.h:1057`), and the Rtc-master examples declared a *variable* named `Rtc`. Renamed it to `myRtc` in all 11 examples (`Rtc` word-boundary only, so `RtcDS1302` / `RtcDateTime` type names are untouched) and repackaged the zip with an identical internal structure. The repo's own Lesson 12 `DS1307` sketch was never affected. |
-| `SD.h` missing | 5 | installed **SD** 1.3.0 (Library Manager) |
-| `JPEGDecoder.h` missing | 2 | installed **JPEGDecoder** 2.0.0 |
+| `SD.h` missing | 8 | installed **SD** 1.3.0 (Library Manager) — `SD.h` is in neither the repo nor the board core |
+| `JPEGDecoder.h` missing | 4 | installed **JPEGDecoder** 2.0.0 — this unblocked **0** rows: it only let the compiler reach each sketch's *real* error, and all 4 turned out to be out of scope (bare `<pgmspace.h>`, SPIFFS, ESP32-only) |
 | `FlashStorage.h` missing | 1 | installed **FlashStorage** 1.0.0 (needed by the board core's own `SDU/extras/SDUBoot`) |
 
 Three sketches only revealed their *real* error once the first missing header
@@ -259,21 +260,15 @@ checklist pass is further along, so they don't get lost.
   the change. Since `board.h` is included by nearly every sketch in this
   repo, any edit to the shared library has a blast radius that's easy to
   underestimate; this one specific case is not worth a shared-library
-  rename just to fix one sketch. **Actual fix applied:** `DHT11.ino` doesn't
-  need `board.h` at all — its only use of anything from it was the `PA6` pin
-  macro, and `pindef.h` (the specific file that defines `PA6`, part of the
-  main library) has zero `#include`s of its own, so it can be pulled in on
-  its own without touching the rest of `board.h`'s chain. Changed
-  `#include <board.h>` to `#include <pindef.h>` — one line, `PA6` stays a
-  real macro (no hardcoded literal). Sketch-local, zero blast radius,
-  verified: the two previously-broken-by-the-abandoned-fix sketches compile
-  fine (shared library reverted to fully untouched), and `DHT11` now compiles
-  clean (24532 bytes). Final diff against the original committed file is
-  exactly one line. Considered but didn't need: pre-defining
-  `_5GHUB_SENSOR_H` before `#include <board.h>` to skip just that one header
-  while keeping the rest of `board.h` (the right tool if a sketch needs more
-  of `board.h` than just pin macros — not needed here since `pindef.h` alone
-  covers everything `DHT11.ino` uses).
+  rename just to fix one sketch. **Actual fix applied (root cause, in the library):** `5GHUB_Sensor.h` inside
+  `5G-NB-IoT_Arduino.zip` now wraps its duplicated typedefs/enums in
+  `#ifndef _ADAFRUIT_SENSOR_H`, so whichever header arrives first wins and the
+  second copy is skipped. `_5GHUB_SensorInterface` stays OUTSIDE the guard,
+  because the BME680/TSL25911/BNO055 classes inherit from it. `DHT11.ino` keeps
+  `#include <board.h>` and simply moves `DHT.h`/`DHT_U.h` above it, so Adafruit's
+  include guard is defined first. Verified with no regression: 127/127 repo
+  sketches and every `board.h`-using zip example still compile; DHT11 is
+  25116 bytes.
   **Lesson for next time:** when a fix could go in a shared library or in the
   one failing sketch, check the sketch-local option first — it's usually
   available (most `board.h` inclusion in this repo looks like habit, not a
@@ -296,19 +291,13 @@ checklist pass is further along, so they don't get lost.
   Not a 2.3.10 issue — would have failed the same on 2.1.1. The last upstream
   commit touching these files is literally titled "change folder name", which
   suggests the mismatch was introduced upstream by a rename.
-  **⚠ Outstanding — the file rename is NOT yet recorded in git.** This repo
-  has `core.ignorecase = true` (git's default on Windows), so git did not
-  detect the case-only rename; `git ls-files` still lists the old lowercase
-  filenames (`.../Position/position.ino`, `.../Rawdata/rawdata.ino`) and
-  `git status` shows nothing. **Anyone cloning this branch would still get
-  the broken lowercase filenames.** To make the fix real in the repo, force
-  it through git explicitly:
-  `git mv --force "KitSketches/Lesson 26 BNO055 Absolute Orientation Sensor/Position/position.ino" "KitSketches/Lesson 26 BNO055 Absolute Orientation Sensor/Position/Position.ino"`
-  (and the same for `rawdata.ino` → `Rawdata.ino`). Verify afterwards with
-  `git ls-files` that the recorded filenames are capitalized.
-  **General lesson:** on Windows, a case-only rename is invisible to git by
-  default. Any case fix in this repo needs `git mv --force` plus a
-  `git ls-files` check, or it silently won't be committed.
+**Recorded in git** (this needed an explicit step): `core.ignorecase = true` is
+  git's default on Windows, so git did not detect the case-only rename and
+  `git status` showed nothing. It was forced through with `git mv --force` and
+  `git ls-files` now shows the capitalized `Position.ino` / `Rawdata.ino`.
+  **General lesson:** on Windows a case-only rename is invisible to git by
+  default — any case fix needs `git mv --force` plus a `git ls-files` check, or it
+  silently will not be committed.
 - **The `u-blox_GNSS` example set has an undocumented external dependency.**
   The repo ships the examples but not the library, and doesn't say which
   version/variant is expected anywhere. Worth adding a line to the top-level
