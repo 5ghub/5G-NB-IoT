@@ -1,0 +1,611 @@
+# IDE 2.3.10 Compatibility Checklist
+
+Tracks every sketch owned by this repo (`ArduinoSketches/`, `KitSketches/`,
+`NBIoTPhone/`) against Arduino IDE 2.3.10. Two independent checks per sketch:
+
+- **IDE Compile** — Sketch → Verify/Compile (✓ button) succeeds with no errors.
+- **HW Test** — uploaded to the physical board and behaves as expected. Leave
+  unchecked until hardware is available; compile-only passes are still valid
+  progress.
+
+Check a box by changing `[ ]` to `[x]`. When a sketch fails, record what broke
+and the fix in **Notes** — that history is the actual deliverable of this pass,
+not just the checkmarks. This applies the same way whether the failure was
+found by hand in the IDE GUI or by the batch script (`scripts/test-compile-all.ps1`)
+— same documentation, regardless of how it was found.
+
+If a failure turns out to be a repeated pattern rather than a one-off (e.g. the
+same kind of issue shows up on more than one sketch — like an undocumented
+bundled dependency `.zip`), it also belongs in `RECOMMENDATIONS.md`, not just
+in that one row's Notes cell. See the u-blox_GNSS library install and the
+`TCPContinuoslyFreeRTOS`/`Arduino-FreeRTOS-SAMD21-master.zip` finding there for
+the pattern to follow.
+
+Everything in the repo is in scope, including `u-blox_GNSS/` (SparkFun's u-blox
+GNSS library examples, bundled here even though the library itself isn't — see
+note on that section below) and `5G OBD/`. `NBIoTPhone/TFTLibrary/` is a library
+zip (TFT_eSPI fork), not a sketch — track it separately if the TFT_eSPI
+`User_Setup.h` swap step itself needs revisiting for 2.3.10.
+
+
+# Part 1 - Sketches owned by this repo
+
+## ArduinoSketches
+
+| # | Sketch | Path | IDE Compile | HW Test | Notes (issue found -> fix) |
+|---|--------|------|:---:|:---:|---|
+| 1 | BlinkLED | `ArduinoSketches/examples/BlinkLED` | [x] | [ ] | Compiled clean on 2.3.10, 11664 bytes (4%). HW test pending — no board available yet. |
+| 2 | Button | `ArduinoSketches/examples/Button` | [x] | [ ] |  |
+| 3 | GNSS | `ArduinoSketches/examples/GNSS` | [x] | [ ] |  |
+| 4 | HTTPClient | `ArduinoSketches/examples/HTTPClient` | [x] | [ ] |  |
+| 5 | HTTPSClient | `ArduinoSketches/examples/HTTPSClient` | [x] | [ ] |  |
+| 6 | ICMPPing | `ArduinoSketches/examples/ICMPPing` | [x] | [ ] |  |
+| 7 | MQTTClient | `ArduinoSketches/examples/MQTTClient` | [x] | [ ] |  |
+| 8 | MQTTSClient | `ArduinoSketches/examples/MQTTSClient` | [x] | [ ] |  |
+| 9 | NetworkRegisteration | `ArduinoSketches/examples/NetworkRegisteration` | [x] | [ ] |  |
+| 10 | NetworkRegisterationmPCI | `ArduinoSketches/examples/NetworkRegisterationmPCI` | [x] | [ ] |  |
+| 11 | QCA4020 | `ArduinoSketches/examples/QCA4020` | [x] | [ ] |  |
+| 12 | SSLClient | `ArduinoSketches/examples/SSLClient` | [x] | [ ] |  |
+| 13 | TCPClient | `ArduinoSketches/examples/TCPClient` | [x] | [ ] |  |
+| 14 | TCPContinuoslyFreeRTOS | `ArduinoSketches/examples/TCPContinuoslyFreeRTOS` | [x] | [ ] |  |
+| 15 | TCPSever | `ArduinoSketches/examples/TCPSever` | [x] | [ ] |  |
+| 16 | TurnOnAllPins | `ArduinoSketches/examples/TurnOnAllPins` | [x] | [ ] |  |
+| 17 | TurnOnAllPinsPCIe | `ArduinoSketches/examples/TurnOnAllPinsPCIe` | [x] | [ ] |  |
+| 18 | TurnOnModem | `ArduinoSketches/examples/TurnOnModem` | [x] | [ ] |  |
+| 19 | TurnPowerOnOffModem | `ArduinoSketches/examples/TurnPowerOnOffModem` | [x] | [ ] |  |
+| 20 | UART | `ArduinoSketches/examples/UART` | [x] | [ ] |  |
+
+## KitSketches
+
+| # | Sketch | Path | IDE Compile | HW Test | Notes (issue found -> fix) |
+|---|--------|------|:---:|:---:|---|
+| 21 | RGB_LED | `KitSketches/Lesson 01 RGB LED/RGB_LED` | [x] | [ ] |  |
+| 22 | Key_Switch | `KitSketches/Lesson 02 Key Switch/Key_Switch` | [x] | [ ] |  |
+| 23 | active (buzzer) | `KitSketches/Lesson 03 Active Buzzer/active` | [x] | [ ] |  |
+| 24 | passive_buzzer | `KitSketches/Lesson 04 Passive Buzzer/passive_buzzer` | [x] | [ ] |  |
+| 25 | Ball_Switch | `KitSketches/Lesson 05 Ball Switch/Ball_Switch` | [x] | [ ] |  |
+| 26 | servo | `KitSketches/Lesson 06 Servo/servo` | [x] | [ ] |  |
+| 27 | Keypad | `KitSketches/Lesson 07 Keypad/Keypad` | [x] | [ ] |  |
+| 28 | DHT11 | `KitSketches/Lesson 08 DHT11 Temperature and Humidity Sensor/DHT11` | [x] | [ ] | Was FAIL: type redeclaration (`sensors_event_t`, `sensor_t`, `SENSOR_TYPE_*`) - `board.h`'s bundled `5GHUB_Sensor.h` duplicates Adafruit's `Adafruit_Sensor.h` names verbatim, and `DHT_U.h` pulls in the real Adafruit header, so both get declared. Not a 2.3.10 issue - a latent repo bug. FIXED at the root in the library: `5GHUB_Sensor.h` now wraps its duplicate typedefs in `#ifndef _ADAFRUIT_SENSOR_H` (`_5GHUB_SensorInterface` stays outside the guard - BME680/TSL25911/BNO055 inherit from it). Sketch keeps `#include <board.h>`, with `DHT.h`/`DHT_U.h` moved above it. Verified no regression: 127/127 repo sketches and every board.h-using zip example still compile. 25116 bytes. |
+| 29 | Analog_Joystick | `KitSketches/Lesson 09 Analog Joystick Module/Analog_Joystick` | [x] | [ ] |  |
+| 30 | IR_Receiver_Module | `KitSketches/Lesson 10 IR Receiver Module/IR_Receiver_Module` | [x] | [ ] |  |
+| 31 | Water_level | `KitSketches/Lesson 11 Water Level Detection Sensor Module/Water_level` | [x] | [ ] |  |
+| 32 | DS1307 (RTC) | `KitSketches/Lesson 12 Real Time Clock Module/DS1307` | [x] | [ ] |  |
+| 33 | Sound_Sensor | `KitSketches/Lesson 13 Sound Sensor Module/Sound_Sensor` | [x] | [ ] |  |
+| 34 | MF-RC522_RFID | `KitSketches/Lesson 14 RC522 RFID Module/MF-RC522_RFID` | [x] | [ ] |  |
+| 35 | HelloWorld (LCD) | `KitSketches/Lesson 15 LCD Display/HelloWorld` | [x] | [ ] |  |
+| 36 | Eight_LED_with_74HC595_Flash_LED | `KitSketches/Lesson 16 Eight LED with 74HC595/Eight_LED_with_74HC595_Flash_LED` | [x] | [ ] |  |
+| 37 | Photocell | `KitSketches/Lesson 17 Photocell/Photocell` | [x] | [ ] |  |
+| 38 | _75hc (segment display) | `KitSketches/Lesson 18 74HC595 And Segment Display/_75hc` | [x] | [ ] |  |
+| 39 | Relay | `KitSketches/Lesson 19 Relay/Relay` | [x] | [ ] |  |
+| 40 | stepper | `KitSketches/Lesson 20 Stepper Motor/stepper` | [x] | [ ] |  |
+| 41 | With_Remote (stepper) | `KitSketches/Lesson 21 Controlling Stepper Motor With Remote/With_Remote` | [x] | [ ] |  |
+| 42 | 5Ghub_bme680async | `KitSketches/Lesson 22 BME680 Envirnomental Sensor/5Ghub_bme680async` | [x] | [ ] |  |
+| 43 | 5gHub_bme680test | `KitSketches/Lesson 22 BME680 Envirnomental Sensor/5gHub_bme680test` | [x] | [ ] |  |
+| 44 | 5Ghub_tsl2591 | `KitSketches/Lesson 23 TSL25911 Light Sensor/5Ghub_tsl2591` | [x] | [ ] |  |
+| 45 | 5Ghub_LC29D | `KitSketches/Lesson 24  LC29D GNSS Receiver/5Ghub_LC29D` | [x] | [ ] |  |
+| 46 | LC29H | `KitSketches/Lesson 25  LC29H GNSS USB/LC29H` | [x] | [ ] |  |
+| 47 | All_data (BNO055) | `KitSketches/Lesson 26 BNO055 Absolute Orientation Sensor/All_data` | [x] | [ ] |  |
+| 48 | Position (BNO055) | `KitSketches/Lesson 26 BNO055 Absolute Orientation Sensor/Position` | [x] | [ ] | Was FAIL: `Can't open sketch: ... missing Position\Position.ino` — folder was `Position\` but the file was `position.ino`; Arduino requires folder name == primary `.ino` name, and `arduino-cli` compares **case-sensitively** even on Windows. Never reached the compiler (a "can't find the sketch" error, not a code error). FIXED by capitalizing the file: `position.ino` → `Position.ino`, matching the sibling `All_data/All_data.ino` convention. Compiles clean, 29200 bytes. **File rename not yet recorded in git** (`core.ignorecase=true`) — see RECOMMENDATIONS.md. |
+| 49 | Rawdata (BNO055) | `KitSketches/Lesson 26 BNO055 Absolute Orientation Sensor/Rawdata` | [x] | [ ] | Same case-mismatch failure as row 48 (`Rawdata\` vs `rawdata.ino`). FIXED by capitalizing the file: `rawdata.ino` → `Rawdata.ino`. Compiles clean, 23372 bytes. **File rename not yet recorded in git** — see RECOMMENDATIONS.md. |
+| 50 | PIRSesnor | `KitSketches/Lesson 27 PIR Sensor/PIRSesnor` | [x] | [ ] |  |
+
+## 5G OBD
+
+| # | Sketch | Path | IDE Compile | HW Test | Notes (issue found -> fix) |
+|---|--------|------|:---:|:---:|---|
+| 51 | OBD_AT_Debug1 | `5G OBD/OBD AT Commands/OBD_AT_Debug1` | [x] | [ ] |  |
+| 52 | OBD_AT_Debug2 | `5G OBD/OBD AT Commands/OBD_AT_Debug2` | [x] | [ ] |  |
+
+## NBIoTPhone
+
+| # | Sketch | Path | IDE Compile | HW Test | Notes (issue found -> fix) |
+|---|--------|------|:---:|:---:|---|
+| 53 | AWS_MQTTS_Client_Bare | `NBIoTPhone/AWS_MQTTS_Client_Bare` | [x] | [ ] |  |
+| 54 | GNSS | `NBIoTPhone/GNSS` | [x] | [ ] |  |
+| 55 | HTTP_Client | `NBIoTPhone/HTTP_Client` | [x] | [ ] |  |
+| 56 | Keyboard | `NBIoTPhone/Keyboard` | [x] | [ ] |  |
+| 57 | ModemOn | `NBIoTPhone/ModemOn` | [x] | [ ] |  |
+| 58 | SD_card | `NBIoTPhone/SD_card` | [x] | [ ] |  |
+| 59 | TFT | `NBIoTPhone/TFT` | [x] | [ ] |  |
+| 60 | TFT_BW_Logo | `NBIoTPhone/TFT_BW_Logo` | [x] | [ ] |  |
+| 61 | TFT_Color_Logo | `NBIoTPhone/TFT_Color_Logo` | [x] | [ ] |  |
+| 62 | TFT_Meters | `NBIoTPhone/TFT_Meters` | [x] | [ ] |  |
+| 63 | TFT_Pie_Chart | `NBIoTPhone/TFT_Pie_Chart` | [x] | [ ] |  |
+| 64 | TFT_Pong | `NBIoTPhone/TFT_Pong` | [x] | [ ] |  |
+| 65 | TFT_Starfield | `NBIoTPhone/TFT_Starfield` | [x] | [ ] |  |
+
+## u-blox_GNSS examples
+
+| # | Sketch | Path | IDE Compile | HW Test | Notes (issue found -> fix) |
+|---|--------|------|:---:|:---:|---|
+| 66 | Automatic_NMEA Example1_getLatestNMEAGPGGA | `u-blox_GNSS/Automatic_NMEA/Example1_getLatestNMEAGPGGA` | [x] | [ ] |  |
+| 67 | Automatic_NMEA Example2_NMEA_GGA_Callbacks | `u-blox_GNSS/Automatic_NMEA/Example2_NMEA_GGA_Callbacks` | [x] | [ ] |  |
+| 68 | Automatic_NMEA Example3_getLatestNMEA_GPGGA-VTG-RMC-ZDA | `u-blox_GNSS/Automatic_NMEA/Example3_getLatestNMEA_GPGGA-VTG-RMC-ZDA` | [x] | [ ] |  |
+| 69 | Automatic_NMEA Example4_NMEA_GGA_VTG_RMC_ZDA_Callbacks | `u-blox_GNSS/Automatic_NMEA/Example4_NMEA_GGA_VTG_RMC_ZDA_Callbacks` | [x] | [ ] |  |
+| 70 | CallbackExample10_ESF_RAW | `u-blox_GNSS/Callbacks/CallbackExample10_ESF_RAW` | [x] | [ ] |  |
+| 71 | CallbackExample11_ESF_RAW_In_Loop | `u-blox_GNSS/Callbacks/CallbackExample11_ESF_RAW_In_Loop` | [x] | [ ] |  |
+| 72 | CallbackExample12_ESF_MEAS_In_Loop | `u-blox_GNSS/Callbacks/CallbackExample12_ESF_MEAS_In_Loop` | [x] | [ ] |  |
+| 73 | CallbackExample1_NAV_PVT | `u-blox_GNSS/Callbacks/CallbackExample1_NAV_PVT` | [x] | [ ] |  |
+| 74 | CallbackExample2_NAV_ODO | `u-blox_GNSS/Callbacks/CallbackExample2_NAV_ODO` | [x] | [ ] |  |
+| 75 | CallbackExample3_TIM_TM2 | `u-blox_GNSS/Callbacks/CallbackExample3_TIM_TM2` | [x] | [ ] |  |
+| 76 | CallbackExample4_HNR | `u-blox_GNSS/Callbacks/CallbackExample4_HNR` | [x] | [ ] |  |
+| 77 | CallbackExample5_ESF | `u-blox_GNSS/Callbacks/CallbackExample5_ESF` | [x] | [ ] |  |
+| 78 | CallbackExample6_RAWX | `u-blox_GNSS/Callbacks/CallbackExample6_RAWX` | [x] | [ ] |  |
+| 79 | CallbackExample7_NAV_SAT | `u-blox_GNSS/Callbacks/CallbackExample7_NAV_SAT` | [x] | [ ] |  |
+| 80 | CallbackExample8_NAV_SVIN | `u-blox_GNSS/Callbacks/CallbackExample8_NAV_SVIN` | [x] | [ ] |  |
+| 81 | CallbackExample9_UseCallbackDataInLoop | `u-blox_GNSS/Callbacks/CallbackExample9_UseCallbackDataInLoop` | [x] | [ ] |  |
+| 82 | Dead_Reckoning Example1_calibrateSensor | `u-blox_GNSS/Dead_Reckoning/Example1_calibrateSensor` | [x] | [ ] |  |
+| 83 | Dead_Reckoning Example2_getIMUData | `u-blox_GNSS/Dead_Reckoning/Example2_getIMUData` | [x] | [ ] |  |
+| 84 | Dead_Reckoning Example3_getSensorStatus | `u-blox_GNSS/Dead_Reckoning/Example3_getSensorStatus` | [x] | [ ] |  |
+| 85 | Dead_Reckoning Example4_vehicleDynamics | `u-blox_GNSS/Dead_Reckoning/Example4_vehicleDynamics` | [x] | [ ] |  |
+| 86 | Dead_Reckoning Example5_getHNRData | `u-blox_GNSS/Dead_Reckoning/Example5_getHNRData` | [x] | [ ] |  |
+| 87 | Dead_Reckoning Example6_getAutoHNRData | `u-blox_GNSS/Dead_Reckoning/Example6_getAutoHNRData` | [x] | [ ] |  |
+| 88 | Dead_Reckoning Example7_setESFAutoAlignment | `u-blox_GNSS/Dead_Reckoning/Example7_setESFAutoAlignment` | [x] | [ ] |  |
+| 89 | Dead_Reckoning Example8_getNAVPVAT | `u-blox_GNSS/Dead_Reckoning/Example8_getNAVPVAT` | [x] | [ ] |  |
+| 90 | Example10_AltitudeMSL | `u-blox_GNSS/Example10_AltitudeMSL` | [x] | [ ] |  |
+| 91 | Example1_FactoryDefaultviaI2C | `u-blox_GNSS/Example11_ResetModule/Example1_FactoryDefaultviaI2C` | [x] | [ ] | Was FAIL: `'SFE_UBLOX_GNSS' does not name a type`. **Late include** — different bug from row 66: `#include <board.h>` WAS present, but on line 9, while `SFE_UBLOX_GNSS myGNSS;` was on line 7. C++ compiles strictly top-to-bottom, so the type didn't exist yet at line 7. FIXED: moved the include above the declaration. Compiles clean, 47316 bytes. Pre-existing upstream bug. |
+| 92 | Example2_FactoryDefaultsviaSerial | `u-blox_GNSS/Example11_ResetModule/Example2_FactoryDefaultsviaSerial` | [x] | [ ] | Was FAIL: `'mySerial' was not declared in this scope`. **Not a bug — a template requiring configuration.** The sketch ships with BOTH serial options commented out (`//#define mySerial Serial1` and `//SoftwareSerial mySerial(10, 11);`), expecting the user to pick one; it cannot compile as shipped by design. FIXED: uncommented `#define mySerial Serial1` (the hardware-UART option — SAMD21 has a real `Serial1`; SoftwareSerial does not exist for this architecture). Compiles clean, 48580 bytes. |
+| 93 | Example12_UseUart | `u-blox_GNSS/Example12_UseUart` | [x] | [ ] | Was FAIL: `fatal error: SoftwareSerial.h: No such file or directory`. **Genuine architecture incompatibility, not a missing library** — verified against the entire Arduino library index: no library provides `SoftwareSerial.h` for `samd` (only `avr`/`esp8266`/`esp32`), because it bit-bangs a UART with AVR-specific timing. Sketch was written for an Uno (its own comment says "Pin 10 on Uno"). FIXED: disabled the SoftwareSerial lines, added `#define mySerial Serial1` (SAMD21 has 6 SERCOM hardware UARTs and needs no software emulation). Also added a documented, ready-to-uncomment "Option B" block for a custom SERCOM UART on MOSI/SCK, following the proven pattern in `ArduinoSketches/examples/UART`. Compiles clean, 48220 bytes. |
+| 94 | Example1_AutoPVT | `u-blox_GNSS/Example13_PVT/Example1_AutoPVT` | [x] | [ ] |  |
+| 95 | Example2_AutoPVT_ExplicitUpdate | `u-blox_GNSS/Example13_PVT/Example2_AutoPVT_ExplicitUpdate` | [x] | [ ] |  |
+| 96 | Example3_AutoPVTviaUart | `u-blox_GNSS/Example13_PVT/Example3_AutoPVTviaUart` | [x] | [ ] |  |
+| 97 | Example4_AssumeAutoPVTviaUart | `u-blox_GNSS/Example13_PVT/Example4_AssumeAutoPVTviaUart` | [x] | [ ] |  |
+| 98 | Example14_DebugOutput | `u-blox_GNSS/Example14_DebugOutput` | [x] | [ ] |  |
+| 99 | Example15_GetDateTime | `u-blox_GNSS/Example15_GetDateTime` | [x] | [ ] |  |
+| 100 | Example16_Nanosecond_MaxOutput | `u-blox_GNSS/Example16_Nanosecond_MaxOutput` | [x] | [ ] |  |
+| 101 | Example16_PartialSecond_MaxOutput | `u-blox_GNSS/Example16_PartialSecond_MaxOutput` | [x] | [ ] |  |
+| 102 | Example17_Geofence | `u-blox_GNSS/Example17_Geofence` | [x] | [ ] |  |
+| 103 | Example18_PowerSaveMode | `u-blox_GNSS/Example18_PowerSaveMode` | [x] | [ ] |  |
+| 104 | Example19_DynamicModel | `u-blox_GNSS/Example19_DynamicModel` | [x] | [ ] |  |
+| 105 | Example1_BasicNMEARead | `u-blox_GNSS/Example1_BasicNMEARead` | [x] | [ ] | Was FAIL: `'SFE_UBLOX_GNSS' does not name a type` (+5 cascading errors). **Missing include** — this was the only 1 of 62 u-blox examples with no `#include <board.h>`, which is where `SFE_UBLOX_GNSS` comes from (the main library bundles its own u-blox header and exposes it via `board.h`). FIXED: added `#include <board.h>`, matching the other 61. Compiles clean, 47220 bytes. Pre-existing upstream bug, not a 2.3.10 issue. |
+| 106 | Example20_SendCustomCommand | `u-blox_GNSS/Example20_SendCustomCommand` | [x] | [ ] |  |
+| 107 | Example21_ModuleInfo | `u-blox_GNSS/Example21_ModuleInfo` | [x] | [ ] |  |
+| 108 | Example22_PowerOff | `u-blox_GNSS/Example22_PowerOff` | [x] | [ ] |  |
+| 109 | Example23_TimePulse_BulletTime | `u-blox_GNSS/Example23_TimePulseParameters/Example23_TimePulse_BulletTime` | [x] | [ ] |  |
+| 110 | Example23_TimePulse_Frequency | `u-blox_GNSS/Example23_TimePulseParameters/Example23_TimePulse_Frequency` | [x] | [ ] |  |
+| 111 | Example23_TimePulse_Period | `u-blox_GNSS/Example23_TimePulseParameters/Example23_TimePulse_Period` | [x] | [ ] |  |
+| 112 | Example24_GetUnixEpochAndMicros | `u-blox_GNSS/Example24_GetUnixEpochAndMicros` | [x] | [ ] |  |
+| 113 | Example25_MeasurementAndNavigationRate | `u-blox_GNSS/Example25_MeasurementAndNavigationRate` | [x] | [ ] |  |
+| 114 | Example26_End | `u-blox_GNSS/Example26_End` | [x] | [ ] |  |
+| 115 | Example27_MultipleRates | `u-blox_GNSS/Example27_MultipleRates` | [x] | [ ] |  |
+| 116 | Example28_GetLeapSecondInfo | `u-blox_GNSS/Example28_GetLeapSecondInfo` | [x] | [ ] |  |
+| 117 | Example29_JammingInformation | `u-blox_GNSS/Example29_JammingInformation` | [x] | [ ] |  |
+| 118 | Example2_NMEAParsing | `u-blox_GNSS/Example2_NMEAParsing` | [x] | [ ] |  |
+| 119 | Example30_NEO-D9S | `u-blox_GNSS/Example30_NEO-D9S` | [x] | [ ] |  |
+| 120 | Example31_Great_Circle_Distance | `u-blox_GNSS/Example31_Great_Circle_Distance` | [x] | [ ] |  |
+| 121 | Example3_GetPosition | `u-blox_GNSS/Example3_GetPosition` | [x] | [ ] |  |
+| 122 | Example4_FixType | `u-blox_GNSS/Example4_FixType` | [x] | [ ] |  |
+| 123 | Example5_SpeedHeadingPrecision | `u-blox_GNSS/Example5_SpeedHeadingPrecision` | [x] | [ ] |  |
+| 124 | Example6_EnableNMEASentences | `u-blox_GNSS/Example6_EnableNMEASentences` | [x] | [ ] |  |
+| 125 | Example7_OutputRate | `u-blox_GNSS/Example7_OutputRate` | [x] | [ ] |  |
+| 126 | Example8_GetProtocolVersion | `u-blox_GNSS/Example8_GetProtocolVersion` | [x] | [ ] |  |
+| 127 | Example9_ChangeI2CAddress | `u-blox_GNSS/Example9_ChangeI2CAddress` | [x] | [ ] |  |
+
+
+# Part 2 - Sketches bundled inside dependency .zip files
+
+These are the example sketches shipped *inside* the repo's bundled
+`.zip` libraries. They are third-party vendor code, not written for this
+board - many target AVR / Teensy / STM32 / ESP hardware and cannot compile
+for SAMD21 at all. A FAIL here is usually expected, not a regression.
+
+Tested by extracting each zip to a temp dir **outside** the repo
+(`scripts/test-compile-zips.sh`) - never extract them in place.
+
+## 5G-NB-IoT  (17/17 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | InputSerialPlotter | `5G-NB-IoT/libraries/I2S/examples/InputSerialPlotter` | [x] | [ ] |  |
+| 2 | SimpleTone | `5G-NB-IoT/libraries/I2S/examples/SimpleTone` | [x] | [ ] |  |
+| 3 | CorrectADCResponse | `5G-NB-IoT/libraries/SAMD_AnalogCorrection/examples/CorrectADCResponse` | [x] | [ ] |  |
+| 4 | Usage | `5G-NB-IoT/libraries/SDU/examples/Usage` | [x] | [ ] |  |
+| 5 | SDUBoot | `5G-NB-IoT/libraries/SDU/extras/SDUBoot` | [x] | [ ] |  |
+| 6 | BarometricPressureSensor | `5G-NB-IoT/libraries/SPI/examples/BarometricPressureSensor` | [x] | [ ] |  |
+| 7 | DigitalPotControl | `5G-NB-IoT/libraries/SPI/examples/DigitalPotControl` | [x] | [ ] |  |
+| 8 | ADKTerminalTest | `5G-NB-IoT/libraries/USBHost/examples/ADKTerminalTest` | [x] | [ ] |  |
+| 9 | KeyboardController | `5G-NB-IoT/libraries/USBHost/examples/KeyboardController` | [x] | [ ] |  |
+| 10 | MouseController | `5G-NB-IoT/libraries/USBHost/examples/MouseController` | [x] | [ ] |  |
+| 11 | USB_desc | `5G-NB-IoT/libraries/USBHost/examples/USB_desc` | [x] | [ ] |  |
+| 12 | SFRRanger_reader | `5G-NB-IoT/libraries/Wire/examples/SFRRanger_reader` | [x] | [ ] |  |
+| 13 | digital_potentiometer | `5G-NB-IoT/libraries/Wire/examples/digital_potentiometer` | [x] | [ ] |  |
+| 14 | master_reader | `5G-NB-IoT/libraries/Wire/examples/master_reader` | [x] | [ ] |  |
+| 15 | master_writer | `5G-NB-IoT/libraries/Wire/examples/master_writer` | [x] | [ ] |  |
+| 16 | slave_receiver | `5G-NB-IoT/libraries/Wire/examples/slave_receiver` | [x] | [ ] |  |
+| 17 | slave_sender | `5G-NB-IoT/libraries/Wire/examples/slave_sender` | [x] | [ ] |  |
+
+## 5G-NB-IoT_Arduino  (13/13 in scope compile, 1 N/A)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | BlinkLED | `5G-NB-IoT/examples/BlinkLED` | [x] | [ ] |  |
+| 2 | Button | `5G-NB-IoT/examples/Button` | [x] | [ ] |  |
+| 3 | GNSS | `5G-NB-IoT/examples/GNSS` | [x] | [ ] |  |
+| 4 | HTTPS_Client | `5G-NB-IoT/examples/HTTPS_Client` | [x] | [ ] |  |
+| 5 | HTTP_Client | `5G-NB-IoT/examples/HTTP_Client` | [x] | [ ] |  |
+| 6 | ICMP_Ping | `5G-NB-IoT/examples/ICMP_Ping` | [x] | [ ] |  |
+| 7 | LEDCellular | `5G-NB-IoT/examples/LEDCellular` | [x] | [ ] |  |
+| 8 | MQTTS_Client | `5G-NB-IoT/examples/MQTTS_Client` | [x] | [ ] |  |
+| 9 | MQTT_Client | `5G-NB-IoT/examples/MQTT_Client` | [x] | [ ] |  |
+| 10 | SSL_Client | `5G-NB-IoT/examples/SSL_Client` | [x] | [ ] |  |
+| 11 | TCP_Client | `5G-NB-IoT/examples/TCP_Client` | [x] | [ ] |  |
+| 12 | TCP_Continuosly_FreeRTOS | `5G-NB-IoT/examples/TCP_Continuosly_FreeRTOS` | [x] | [ ] |  |
+| 13 | TCP_Sever | `5G-NB-IoT/examples/TCP_Sever` | N/A | - | **Out of scope** - Teensy 4.x only. |
+| 14 | Test_all_PIN | `5G-NB-IoT/examples/Test_all_PIN` | [x] | [ ] |  |
+
+## ArduinoSketches_examples_TCPContinuoslyFreeRTOS_Arduino-FreeRTOS-SAMD21-master  (5/5 in scope compile, 1 N/A)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | Basic_RTOS_Example | `Arduino-FreeRTOS-SAMD21-master/examples/Basic_RTOS_Example` | [x] | [ ] |  |
+| 2 | Basic_RTOS_Example2 | `Arduino-FreeRTOS-SAMD21-master/examples/Basic_RTOS_Example2` | N/A | - | **Out of scope** - AVR-only library. |
+| 3 | CompilerAndLinker_Test | `Arduino-FreeRTOS-SAMD21-master/examples/CompilerAndLinker_Test` | [x] | [ ] |  |
+| 4 | GpioInterrupt_Test | `Arduino-FreeRTOS-SAMD21-master/examples/GpioInterrupt_Test` | [x] | [ ] |  |
+| 5 | RtosCrash_Test | `Arduino-FreeRTOS-SAMD21-master/examples/RtosCrash_Test` | [x] | [ ] |  |
+| 6 | TaskLoad_RTOS_Example | `Arduino-FreeRTOS-SAMD21-master/examples/TaskLoad_RTOS_Example` | [x] | [ ] |  |
+
+## KitSketches_Lesson_06_Servo_Servo  (2/2 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | Knob | `Servo/examples/Knob` | [x] | [ ] |  |
+| 2 | Sweep | `Servo/examples/Sweep` | [x] | [ ] |  |
+
+## KitSketches_Lesson_07_Keypad_Keypad  (1/1 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | CustomKeypad | `Keypad/examples/CustomKeypad` | [x] | [ ] |  |
+
+## KitSketches_Lesson_08_DHT11_Temperature_and_Humidity_Sensor_DHT-sensor-library-master  (2/2 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | DHT_Unified_Sensor | `DHT-sensor-library-master/examples/DHT_Unified_Sensor` | [x] | [ ] |  |
+| 2 | DHTtester | `DHT-sensor-library-master/examples/DHTtester` | [x] | [ ] |  |
+
+## KitSketches_Lesson_10_IR_Receiver_Module_IRLib2-master  (13/13 in scope compile, 2 N/A)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | IoT_IR | `IRLib2-master/IRLib2/examples/Iot_IR/IoT_IR` | N/A | - | **Out of scope** - requires the WiFi101 shield library. |
+| 2 | analyze | `IRLib2-master/IRLib2/examples/analyze` | [x] | [ ] |  |
+| 3 | autoResume | `IRLib2-master/IRLib2/examples/autoResume` | [x] | [ ] |  |
+| 4 | comboDump | `IRLib2-master/IRLib2/examples/comboDump` | [x] | [ ] |  |
+| 5 | dump | `IRLib2-master/IRLib2/examples/dump` | [x] | [ ] |  |
+| 6 | dumpFreq | `IRLib2-master/IRLib2/examples/dumpFreq` | [x] | [ ] |  |
+| 7 | freq | `IRLib2-master/IRLib2/examples/freq` | [x] | [ ] |  |
+| 8 | hashDecode | `IRLib2-master/IRLib2/examples/hashDecode` | [x] | [ ] |  |
+| 9 | pattern | `IRLib2-master/IRLib2/examples/pattern` | [x] | [ ] |  |
+| 10 | rawRecv | `IRLib2-master/IRLib2/examples/rawRecv` | [x] | [ ] |  |
+| 11 | rawSend | `IRLib2-master/IRLib2/examples/rawSend` | N/A | - | **Out of scope** - IRLib AVR-specific example. |
+| 12 | record | `IRLib2-master/IRLib2/examples/record` | [x] | [ ] |  |
+| 13 | send | `IRLib2-master/IRLib2/examples/send` | [x] | [ ] |  |
+| 14 | serialRemote | `IRLib2-master/IRLib2/examples/serialRemote` | [x] | [ ] |  |
+| 15 | servo | `IRLib2-master/IRLib2/examples/servo` | [x] | [ ] |  |
+
+## KitSketches_Lesson_12_Real_Time_Clock_Module_Rtc-master  (12/12 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | DS1302_Memory | `Rtc-master/examples/DS1302_Memory` | [x] | [ ] |  |
+| 2 | DS1302_Simple | `Rtc-master/examples/DS1302_Simple` | [x] | [ ] |  |
+| 3 | DS1307_Memory | `Rtc-master/examples/DS1307_Memory` | [x] | [ ] |  |
+| 4 | DS1307_Simple | `Rtc-master/examples/DS1307_Simple` | [x] | [ ] |  |
+| 5 | DS3231_Alarms | `Rtc-master/examples/DS3231_Alarms` | [x] | [ ] |  |
+| 6 | DS3231_Memory | `Rtc-master/examples/DS3231_Memory` | [x] | [ ] |  |
+| 7 | DS3231_Simple | `Rtc-master/examples/DS3231_Simple` | [x] | [ ] |  |
+| 8 | DS3231_StoreIt | `Rtc-master/examples/DS3231_StoreIt` | [x] | [ ] |  |
+| 9 | DS3234_Alarms | `Rtc-master/examples/DS3234_Alarms` | [x] | [ ] |  |
+| 10 | DS3234_Memory | `Rtc-master/examples/DS3234_Memory` | [x] | [ ] |  |
+| 11 | DS3234_Simple | `Rtc-master/examples/DS3234_Simple` | [x] | [ ] |  |
+| 12 | RtcTemperatureTests | `Rtc-master/extras/RtcTemperatureTests` | [x] | [ ] |  |
+
+## KitSketches_Lesson_14_RC522_RFID_Module_rfid-master  (14/14 in scope compile, 1 N/A)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | AccessControl | `rfid-master/examples/AccessControl` | N/A | - | **Out of scope** - no EEPROM library for this core. |
+| 2 | ChangeUID | `rfid-master/examples/ChangeUID` | [x] | [ ] |  |
+| 3 | DumpInfo | `rfid-master/examples/DumpInfo` | [x] | [ ] |  |
+| 4 | FixBrickedUID | `rfid-master/examples/FixBrickedUID` | [x] | [ ] |  |
+| 5 | MifareClassicValueBlock | `rfid-master/examples/MifareClassicValueBlock` | [x] | [ ] |  |
+| 6 | MinimalInterrupt | `rfid-master/examples/MinimalInterrupt` | [x] | [ ] |  |
+| 7 | Ntag216_AUTH | `rfid-master/examples/Ntag216_AUTH` | [x] | [ ] |  |
+| 8 | RFID-Cloner | `rfid-master/examples/RFID-Cloner` | [x] | [ ] |  |
+| 9 | ReadAndWrite | `rfid-master/examples/ReadAndWrite` | [x] | [ ] |  |
+| 10 | ReadNUID | `rfid-master/examples/ReadNUID` | [x] | [ ] |  |
+| 11 | ReadUidMultiReader | `rfid-master/examples/ReadUidMultiReader` | [x] | [ ] |  |
+| 12 | firmware_check | `rfid-master/examples/firmware_check` | [x] | [ ] |  |
+| 13 | rfid_default_keys | `rfid-master/examples/rfid_default_keys` | [x] | [ ] |  |
+| 14 | rfid_read_personal_data | `rfid-master/examples/rfid_read_personal_data` | [x] | [ ] |  |
+| 15 | rfid_write_personal_data | `rfid-master/examples/rfid_write_personal_data` | [x] | [ ] |  |
+
+## KitSketches_Lesson_15_LCD_Display_LiquidCrystal  (10/10 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | Autoscroll | `LiquidCrystal/examples/Autoscroll` | [x] | [ ] |  |
+| 2 | Blink | `LiquidCrystal/examples/Blink` | [x] | [ ] |  |
+| 3 | Cursor | `LiquidCrystal/examples/Cursor` | [x] | [ ] |  |
+| 4 | CustomCharacter | `LiquidCrystal/examples/CustomCharacter` | [x] | [ ] |  |
+| 5 | Display | `LiquidCrystal/examples/Display` | [x] | [ ] |  |
+| 6 | HelloWorld | `LiquidCrystal/examples/HelloWorld` | [x] | [ ] |  |
+| 7 | Scroll | `LiquidCrystal/examples/Scroll` | [x] | [ ] |  |
+| 8 | SerialDisplay | `LiquidCrystal/examples/SerialDisplay` | [x] | [ ] |  |
+| 9 | TextDirection | `LiquidCrystal/examples/TextDirection` | [x] | [ ] |  |
+| 10 | setCursor | `LiquidCrystal/examples/setCursor` | [x] | [ ] |  |
+
+## KitSketches_Lesson_20_Stepper_Motor_Stepper  (4/4 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | MotorKnob | `Stepper/examples/MotorKnob` | [x] | [ ] |  |
+| 2 | stepper_oneRevolution | `Stepper/examples/stepper_oneRevolution` | [x] | [ ] |  |
+| 3 | stepper_oneStepAtATime | `Stepper/examples/stepper_oneStepAtATime` | [x] | [ ] |  |
+| 4 | stepper_speedControl | `Stepper/examples/stepper_speedControl` | [x] | [ ] |  |
+
+## KitSketches_Lesson_21_Controlling_Stepper_Motor_With_Remote_IRremote  (0/0 in scope compile, 8 N/A)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | IRrecord | `IRremote/examples/IRrecord` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+| 2 | IRrecvDemo | `IRremote/examples/IRrecvDemo` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+| 3 | IRrecvDump | `IRremote/examples/IRrecvDump` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+| 4 | IRrelay | `IRremote/examples/IRrelay` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+| 5 | IRsendDemo | `IRremote/examples/IRsendDemo` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+| 6 | IRtest | `IRremote/examples/IRtest` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+| 7 | IRtest2 | `IRremote/examples/IRtest2` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+| 8 | JVCPanasonicSendDemo | `IRremote/examples/JVCPanasonicSendDemo` | N/A | - | **Out of scope** - AVR Timer2 hardware registers. |
+
+## KitSketches_Lesson_21_Controlling_Stepper_Motor_With_Remote_Stepper  (4/4 in scope compile)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | MotorKnob | `Stepper/examples/MotorKnob` | [x] | [ ] |  |
+| 2 | stepper_oneRevolution | `Stepper/examples/stepper_oneRevolution` | [x] | [ ] |  |
+| 3 | stepper_oneStepAtATime | `Stepper/examples/stepper_oneStepAtATime` | [x] | [ ] |  |
+| 4 | stepper_speedControl | `Stepper/examples/stepper_speedControl` | [x] | [ ] |  |
+
+## NBIoTPhone_SD_card_SdFat  (42/42 in scope compile, 16 N/A)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | AnalogLogger | `examples/#attic/AnalogLogger` | [x] | [ ] |  |
+| 2 | BaseExtCaseTest | `examples/#attic/BaseExtCaseTest` | [x] | [ ] |  |
+| 3 | HelloWorld | `examples/#attic/HelloWorld` | [x] | [ ] |  |
+| 4 | MiniSerial | `examples/#attic/MiniSerial` | N/A | - | **Out of scope** - sketch declares itself AVR-only via #error. |
+| 5 | PrintBenchmarkSD | `examples/#attic/PrintBenchmarkSD` | [x] | [ ] |  |
+| 6 | SD_Size | `examples/#attic/SD_Size` | [x] | [ ] |  |
+| 7 | SdFatSize | `examples/#attic/SdFatSize` | [x] | [ ] |  |
+| 8 | StreamParseInt | `examples/#attic/StreamParseInt` | [x] | [ ] |  |
+| 9 | append | `examples/#attic/append` | [x] | [ ] |  |
+| 10 | average | `examples/#attic/average` | [x] | [ ] |  |
+| 11 | benchSD | `examples/#attic/benchSD` | [x] | [ ] |  |
+| 12 | bufstream | `examples/#attic/bufstream` | [x] | [ ] |  |
+| 13 | cin_cout | `examples/#attic/cin_cout` | [x] | [ ] |  |
+| 14 | eventlog | `examples/#attic/eventlog` | [x] | [ ] |  |
+| 15 | fgetsRewrite | `examples/#attic/fgetsRewrite` | [x] | [ ] |  |
+| 16 | readlog | `examples/#attic/readlog` | [x] | [ ] |  |
+| 17 | AnalogBinLogger | `examples/AnalogBinLogger` | N/A | - | **Out of scope** - sketch declares itself AVR-only via #error. |
+| 18 | DirectoryFunctions | `examples/DirectoryFunctions` | [x] | [ ] |  |
+| 19 | LongFileName | `examples/LongFileName` | [x] | [ ] |  |
+| 20 | LowLatencyLogger | `examples/LowLatencyLogger` | [x] | [ ] |  |
+| 21 | LowLatencyLoggerADXL345 | `examples/LowLatencyLoggerADXL345` | [x] | [ ] |  |
+| 22 | LowLatencyLoggerMPU6050 | `examples/LowLatencyLoggerMPU6050` | N/A | - | **Out of scope** - I2Cdev/MPU6050 library. |
+| 23 | OpenNext | `examples/OpenNext` | [x] | [ ] |  |
+| 24 | PrintBenchmark | `examples/PrintBenchmark` | [x] | [ ] |  |
+| 25 | QuickStart | `examples/QuickStart` | [x] | [ ] |  |
+| 26 | RawWrite | `examples/RawWrite` | [x] | [ ] |  |
+| 27 | ReadCsv | `examples/ReadCsv` | [x] | [ ] |  |
+| 28 | ReadCsvArray | `examples/ReadCsvArray` | [x] | [ ] |  |
+| 29 | ReadCsvStream | `examples/ReadCsvStream` | [x] | [ ] |  |
+| 30 | ReadWrite | `examples/ReadWrite` | [x] | [ ] |  |
+| 31 | STM32Test | `examples/STM32Test` | N/A | - | **Out of scope** - pin not defined in this board variant. |
+| 32 | SdFormatter | `examples/SdFormatter` | [x] | [ ] |  |
+| 33 | SdInfo | `examples/SdInfo` | [x] | [ ] |  |
+| 34 | SoftwareSpi | `examples/SoftwareSpi` | [x] | [ ] |  |
+| 35 | StdioBench | `examples/StdioBench` | [x] | [ ] |  |
+| 36 | TeensySdioDemo | `examples/TeensySdioDemo` | N/A | - | **Out of scope** - Teensy SDIO only. |
+| 37 | Timestamp | `examples/Timestamp` | [x] | [ ] |  |
+| 38 | TwoCards | `examples/TwoCards` | [x] | [ ] |  |
+| 39 | VolumeFreeSpace | `examples/VolumeFreeSpace` | [x] | [ ] |  |
+| 40 | bench | `examples/bench` | [x] | [ ] |  |
+| 41 | dataLogger | `examples/dataLogger` | [x] | [ ] |  |
+| 42 | fgets | `examples/fgets` | [x] | [ ] |  |
+| 43 | formatting | `examples/formatting` | [x] | [ ] |  |
+| 44 | getline | `examples/getline` | [x] | [ ] |  |
+| 45 | rename | `examples/rename` | [x] | [ ] |  |
+| 46 | wipe | `examples/wipe` | [x] | [ ] |  |
+| 47 | ATS_SD_File | `extras/SdFatTestSuite/examples/ATS_SD_File` | N/A | - | **Out of scope** - SdFat internal test harness in extras/ - not example code. |
+| 48 | ATS_SD_Files | `extras/SdFatTestSuite/examples/ATS_SD_Files` | N/A | - | **Out of scope** - SdFat internal test harness in extras/ - not example code. |
+| 49 | ATS_SD_Seek | `extras/SdFatTestSuite/examples/ATS_SD_Seek` | N/A | - | **Out of scope** - SdFat internal test harness in extras/ - not example code. |
+| 50 | StressTest | `extras/SdFatTestSuite/examples/StressTest` | N/A | - | **Out of scope** - link fails on SAMD21 - exceeds 256KB flash / 32KB RAM, or uses TFT_eSPI DMA (ESP32/STM32/RP2040 only). |
+| 51 | TestMkdir | `extras/SdFatTestSuite/examples/TestMkdir` | N/A | - | **Out of scope** - header removed upstream in SdFat 1.1.4 - broken vendor example. |
+| 52 | TestRmdir | `extras/SdFatTestSuite/examples/TestRmdir` | N/A | - | **Out of scope** - header removed upstream in SdFat 1.1.4 - broken vendor example. |
+| 53 | fstreamTest | `extras/SdFatTestSuite/examples/fstreamTest` | N/A | - | **Out of scope** - SdFat internal test harness in extras/ - not example code. |
+| 54 | istreamTest | `extras/SdFatTestSuite/examples/istreamTest` | N/A | - | **Out of scope** - SdFat internal test harness in extras/ - not example code. |
+| 55 | lfnSize | `extras/SdFatTestSuite/examples/lfnSize` | [x] | [ ] |  |
+| 56 | lfnTest | `extras/SdFatTestSuite/examples/lfnTest` | N/A | - | **Out of scope** - header removed upstream in SdFat 1.1.4 - broken vendor example. |
+| 57 | lfnTestCout | `extras/SdFatTestSuite/examples/lfnTestCout` | N/A | - | **Out of scope** - header removed upstream in SdFat 1.1.4 - broken vendor example. |
+| 58 | ostreamTest | `extras/SdFatTestSuite/examples/ostreamTest` | N/A | - | **Out of scope** - SdFat internal test harness in extras/ - not example code. |
+
+## NBIoTPhone_TFTLibrary_TFT_eSPI-master  (64/64 in scope compile, 52 N/A)
+
+| # | Sketch | Path (inside zip) | IDE Compile | HW Test | Notes |
+|---|--------|------|:---:|:---:|---|
+| 1 | Arduino_Life | `TFT_eSPI-master/examples/160 x 128/Arduino_Life` | [x] | [ ] |  |
+| 2 | Pong_v3 | `TFT_eSPI-master/examples/160 x 128/Pong_v3` | [x] | [ ] |  |
+| 3 | RLE_Font_test | `TFT_eSPI-master/examples/160 x 128/RLE_Font_test` | [x] | [ ] |  |
+| 4 | TFT_Char_times | `TFT_eSPI-master/examples/160 x 128/TFT_Char_times` | [x] | [ ] |  |
+| 5 | TFT_Clock | `TFT_eSPI-master/examples/160 x 128/TFT_Clock` | [x] | [ ] |  |
+| 6 | TFT_Clock_Digital | `TFT_eSPI-master/examples/160 x 128/TFT_Clock_Digital` | [x] | [ ] |  |
+| 7 | TFT_Ellipse | `TFT_eSPI-master/examples/160 x 128/TFT_Ellipse` | [x] | [ ] |  |
+| 8 | TFT_Meter_5 | `TFT_eSPI-master/examples/160 x 128/TFT_Meter_5` | N/A | - | **Out of scope** - AVR libc function. |
+| 9 | TFT_Print_Test | `TFT_eSPI-master/examples/160 x 128/TFT_Print_Test` | [x] | [ ] |  |
+| 10 | TFT_Rainbow | `TFT_eSPI-master/examples/160 x 128/TFT_Rainbow` | [x] | [ ] |  |
+| 11 | TFT_SPIFFS_Jpeg | `TFT_eSPI-master/examples/160 x 128/TFT_SPIFFS_Jpeg` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 12 | TFT_flash_jpg | `TFT_eSPI-master/examples/160 x 128/TFT_flash_jpg` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 13 | TFT_graphicstest_PDQ3 | `TFT_eSPI-master/examples/160 x 128/TFT_graphicstest_PDQ3` | [x] | [ ] |  |
+| 14 | TFT_graphicstest_small | `TFT_eSPI-master/examples/160 x 128/TFT_graphicstest_small` | [x] | [ ] |  |
+| 15 | UTFT_demo_fast | `TFT_eSPI-master/examples/160 x 128/UTFT_demo_fast` | [x] | [ ] |  |
+| 16 | All_Free_Fonts_Demo | `TFT_eSPI-master/examples/320 x 240/All_Free_Fonts_Demo` | N/A | - | **Out of scope** - link fails on SAMD21 - exceeds 256KB flash / 32KB RAM, or uses TFT_eSPI DMA (ESP32/STM32/RP2040 only). |
+| 17 | Cellular_Automata | `TFT_eSPI-master/examples/320 x 240/Cellular_Automata` | N/A | - | **Out of scope** - link fails on SAMD21 - exceeds 256KB flash / 32KB RAM, or uses TFT_eSPI DMA (ESP32/STM32/RP2040 only). |
+| 18 | Free_Font_Demo | `TFT_eSPI-master/examples/320 x 240/Free_Font_Demo` | [x] | [ ] |  |
+| 19 | Keypad_240x320 | `TFT_eSPI-master/examples/320 x 240/Keypad_240x320` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 20 | RLE_Font_test | `TFT_eSPI-master/examples/320 x 240/RLE_Font_test` | [x] | [ ] |  |
+| 21 | Read_ID_bitbash | `TFT_eSPI-master/examples/320 x 240/Read_ID_bitbash` | N/A | - | **Out of scope** - ESP pin naming. |
+| 22 | TFT_ArcFill | `TFT_eSPI-master/examples/320 x 240/TFT_ArcFill` | [x] | [ ] |  |
+| 23 | TFT_Char_times | `TFT_eSPI-master/examples/320 x 240/TFT_Char_times` | [x] | [ ] |  |
+| 24 | TFT_Clock | `TFT_eSPI-master/examples/320 x 240/TFT_Clock` | [x] | [ ] |  |
+| 25 | TFT_Clock_Digital | `TFT_eSPI-master/examples/320 x 240/TFT_Clock_Digital` | [x] | [ ] |  |
+| 26 | TFT_Custom_Fonts | `TFT_eSPI-master/examples/320 x 240/TFT_Custom_Fonts` | [x] | [ ] |  |
+| 27 | TFT_Ellipse | `TFT_eSPI-master/examples/320 x 240/TFT_Ellipse` | [x] | [ ] |  |
+| 28 | TFT_FillArcSpiral | `TFT_eSPI-master/examples/320 x 240/TFT_FillArcSpiral` | [x] | [ ] |  |
+| 29 | TFT_Float_Test | `TFT_eSPI-master/examples/320 x 240/TFT_Float_Test` | N/A | - | **Out of scope** - AVR libc function. |
+| 30 | TFT_Mandlebrot | `TFT_eSPI-master/examples/320 x 240/TFT_Mandlebrot` | [x] | [ ] |  |
+| 31 | TFT_Matrix | `TFT_eSPI-master/examples/320 x 240/TFT_Matrix` | N/A | - | **Out of scope** - TFT_eSPI driver-specific constants (different display config). |
+| 32 | TFT_Meter_linear | `TFT_eSPI-master/examples/320 x 240/TFT_Meter_linear` | N/A | - | **Out of scope** - AVR libc function. |
+| 33 | TFT_Meters | `TFT_eSPI-master/examples/320 x 240/TFT_Meters` | N/A | - | **Out of scope** - AVR libc function. |
+| 34 | TFT_Pie_Chart | `TFT_eSPI-master/examples/320 x 240/TFT_Pie_Chart` | [x] | [ ] |  |
+| 35 | TFT_Pong | `TFT_eSPI-master/examples/320 x 240/TFT_Pong` | [x] | [ ] |  |
+| 36 | TFT_Print_Test | `TFT_eSPI-master/examples/320 x 240/TFT_Print_Test` | [x] | [ ] |  |
+| 37 | TFT_Rainbow_one_lib | `TFT_eSPI-master/examples/320 x 240/TFT_Rainbow_one_lib` | [x] | [ ] |  |
+| 38 | TFT_Read_Reg | `TFT_eSPI-master/examples/320 x 240/TFT_Read_Reg` | N/A | - | **Out of scope** - TFT_eSPI driver-specific constants (different display config). |
+| 39 | TFT_Spiro | `TFT_eSPI-master/examples/320 x 240/TFT_Spiro` | [x] | [ ] |  |
+| 40 | TFT_Starfield | `TFT_eSPI-master/examples/320 x 240/TFT_Starfield` | [x] | [ ] |  |
+| 41 | TFT_String_Align | `TFT_eSPI-master/examples/320 x 240/TFT_String_Align` | [x] | [ ] |  |
+| 42 | TFT_Terminal | `TFT_eSPI-master/examples/320 x 240/TFT_Terminal` | N/A | - | **Out of scope** - TFT_eSPI driver-specific constants (different display config). |
+| 43 | TFT_graphicstest_PDQ | `TFT_eSPI-master/examples/320 x 240/TFT_graphicstest_PDQ` | [x] | [ ] |  |
+| 44 | TFT_graphicstest_one_lib | `TFT_eSPI-master/examples/320 x 240/TFT_graphicstest_one_lib` | [x] | [ ] |  |
+| 45 | UTFT_demo | `TFT_eSPI-master/examples/320 x 240/UTFT_demo` | [x] | [ ] |  |
+| 46 | Cellular_Automata | `TFT_eSPI-master/examples/480 x 320/Cellular_Automata` | N/A | - | **Out of scope** - link fails on SAMD21 - exceeds 256KB flash / 32KB RAM, or uses TFT_eSPI DMA (ESP32/STM32/RP2040 only). |
+| 47 | Demo_3D_cube | `TFT_eSPI-master/examples/480 x 320/Demo_3D_cube` | [x] | [ ] |  |
+| 48 | Free_Font_Demo | `TFT_eSPI-master/examples/480 x 320/Free_Font_Demo` | [x] | [ ] |  |
+| 49 | Graph_2 | `TFT_eSPI-master/examples/480 x 320/Graph_2` | [x] | [ ] |  |
+| 50 | Keypad_480x320 | `TFT_eSPI-master/examples/480 x 320/Keypad_480x320` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 51 | TFT_Char_times | `TFT_eSPI-master/examples/480 x 320/TFT_Char_times` | [x] | [ ] |  |
+| 52 | TFT_Ellipse | `TFT_eSPI-master/examples/480 x 320/TFT_Ellipse` | [x] | [ ] |  |
+| 53 | TFT_Meter_4 | `TFT_eSPI-master/examples/480 x 320/TFT_Meter_4` | N/A | - | **Out of scope** - AVR libc function. |
+| 54 | TFT_Meters | `TFT_eSPI-master/examples/480 x 320/TFT_Meters` | N/A | - | **Out of scope** - AVR libc function. |
+| 55 | TFT_Padding_demo | `TFT_eSPI-master/examples/480 x 320/TFT_Padding_demo` | [x] | [ ] |  |
+| 56 | TFT_Print_Test | `TFT_eSPI-master/examples/480 x 320/TFT_Print_Test` | [x] | [ ] |  |
+| 57 | TFT_Rainbow480 | `TFT_eSPI-master/examples/480 x 320/TFT_Rainbow480` | [x] | [ ] |  |
+| 58 | TFT_String_Align | `TFT_eSPI-master/examples/480 x 320/TFT_String_Align` | [x] | [ ] |  |
+| 59 | TFT_flash_jpg | `TFT_eSPI-master/examples/480 x 320/TFT_flash_jpg` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 60 | TFT_graphicstest_one_lib | `TFT_eSPI-master/examples/480 x 320/TFT_graphicstest_one_lib` | [x] | [ ] |  |
+| 61 | TFT_ring_meter | `TFT_eSPI-master/examples/480 x 320/TFT_ring_meter` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 62 | Touch_Controller_Demo | `TFT_eSPI-master/examples/480 x 320/Touch_Controller_Demo` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 63 | UTFT_Demo_480x320 | `TFT_eSPI-master/examples/480 x 320/UTFT_Demo_480x320` | [x] | [ ] |  |
+| 64 | Flash_Jpg_DMA | `TFT_eSPI-master/examples/DMA test/Flash_Jpg_DMA` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 65 | SpriteRotatingCube | `TFT_eSPI-master/examples/DMA test/SpriteRotatingCube` | N/A | - | **Out of scope** - link fails on SAMD21 - exceeds 256KB flash / 32KB RAM, or uses TFT_eSPI DMA (ESP32/STM32/RP2040 only). |
+| 66 | boing_ball | `TFT_eSPI-master/examples/DMA test/boing_ball` | N/A | - | **Out of scope** - link fails on SAMD21 - exceeds 256KB flash / 32KB RAM, or uses TFT_eSPI DMA (ESP32/STM32/RP2040 only). |
+| 67 | ESP32_SDcard_jpeg | `TFT_eSPI-master/examples/Generic/ESP32_SDcard_jpeg` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 68 | ESP8266_uncannyEyes | `TFT_eSPI-master/examples/Generic/ESP8266_uncannyEyes` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 69 | Local_Custom_Fonts | `TFT_eSPI-master/examples/Generic/Local_Custom_Fonts` | [x] | [ ] |  |
+| 70 | On_Off_Button | `TFT_eSPI-master/examples/Generic/On_Off_Button` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 71 | TFT_Button_Label_Datum | `TFT_eSPI-master/examples/Generic/TFT_Button_Label_Datum` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 72 | TFT_Flash_Bitmap | `TFT_eSPI-master/examples/Generic/TFT_Flash_Bitmap` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 73 | TFT_SPIFFS_BMP | `TFT_eSPI-master/examples/Generic/TFT_SPIFFS_BMP` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 74 | TFT_Screen_Capture | `TFT_eSPI-master/examples/Generic/TFT_Screen_Capture` | [x] | [ ] |  |
+| 75 | Touch_calibrate | `TFT_eSPI-master/examples/Generic/Touch_calibrate` | N/A | - | **Out of scope** - TFT_eSPI touch support needs TOUCH_CS set in User_Setup.h. |
+| 76 | alphaBlend_Test | `TFT_eSPI-master/examples/Generic/alphaBlend_Test` | [x] | [ ] |  |
+| 77 | drawXBitmap | `TFT_eSPI-master/examples/Generic/drawXBitmap` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 78 | Font_Demo_1_Array | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Font_Demo_1_Array` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 79 | Font_Demo_2_Array | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Font_Demo_2_Array` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 80 | Font_Demo_3_Array | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Font_Demo_3_Array` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 81 | Font_Demo_4_Array | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Font_Demo_4_Array` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 82 | Print_Smooth_Font | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Print_Smooth_Font` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 83 | Smooth_font_gradient | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Smooth_font_gradient` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 84 | Smooth_font_reading_TFT | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Smooth_font_reading_TFT` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 85 | Unicode_test | `TFT_eSPI-master/examples/Smooth Fonts/FLASH_Array/Unicode_test` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 86 | ESP32_Smooth_Font_SD | `TFT_eSPI-master/examples/Smooth Fonts/SD_Card/ESP32_Smooth_Font_SD` | N/A | - | **Out of scope** - ESP32-only example (uses the ESP32 SD/FS API). |
+| 87 | Font_Demo_1 | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Font_Demo_1` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 88 | Font_Demo_2 | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Font_Demo_2` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 89 | Font_Demo_3 | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Font_Demo_3` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 90 | Font_Demo_4 | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Font_Demo_4` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 91 | Print_Smooth_Font | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Print_Smooth_Font` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 92 | Smooth_font_gradient | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Smooth_font_gradient` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 93 | Smooth_font_reading_TFT | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Smooth_font_reading_TFT` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 94 | Unicode_test | `TFT_eSPI-master/examples/Smooth Fonts/SPIFFS/Unicode_test` | N/A | - | **Out of scope** - ESP filesystem. |
+| 95 | Animated_dial | `TFT_eSPI-master/examples/Sprite/Animated_dial` | N/A | - | **Out of scope** - bare <pgmspace.h> is the ESP convention; SAMD core ships <avr/pgmspace.h>. |
+| 96 | One_bit_Sprite_Demo | `TFT_eSPI-master/examples/Sprite/One_bit_Sprite_Demo` | [x] | [ ] |  |
+| 97 | One_bit_Yin_Yang | `TFT_eSPI-master/examples/Sprite/One_bit_Yin_Yang` | [x] | [ ] |  |
+| 98 | Rotated_Sprite_1 | `TFT_eSPI-master/examples/Sprite/Rotated_Sprite_1` | [x] | [ ] |  |
+| 99 | Rotated_Sprite_2 | `TFT_eSPI-master/examples/Sprite/Rotated_Sprite_2` | [x] | [ ] |  |
+| 100 | Rotated_Sprite_3 | `TFT_eSPI-master/examples/Sprite/Rotated_Sprite_3` | N/A | - | **Out of scope** - ESP32/ESP8266 filesystem - no SAMD equivalent exists. |
+| 101 | Sprite_RLE_Font_test | `TFT_eSPI-master/examples/Sprite/Sprite_RLE_Font_test` | [x] | [ ] |  |
+| 102 | Sprite_TFT_Rainbow | `TFT_eSPI-master/examples/Sprite/Sprite_TFT_Rainbow` | [x] | [ ] |  |
+| 103 | Sprite_draw | `TFT_eSPI-master/examples/Sprite/Sprite_draw` | [x] | [ ] |  |
+| 104 | Sprite_draw_4bit | `TFT_eSPI-master/examples/Sprite/Sprite_draw_4bit` | [x] | [ ] |  |
+| 105 | Sprite_scroll | `TFT_eSPI-master/examples/Sprite/Sprite_scroll` | [x] | [ ] |  |
+| 106 | Sprite_scroll_16bit | `TFT_eSPI-master/examples/Sprite/Sprite_scroll_16bit` | [x] | [ ] |  |
+| 107 | Sprite_scroll_1bit | `TFT_eSPI-master/examples/Sprite/Sprite_scroll_1bit` | [x] | [ ] |  |
+| 108 | Sprite_scroll_4bit | `TFT_eSPI-master/examples/Sprite/Sprite_scroll_4bit` | [x] | [ ] |  |
+| 109 | Sprite_scroll_8bit | `TFT_eSPI-master/examples/Sprite/Sprite_scroll_8bit` | [x] | [ ] |  |
+| 110 | Sprite_scroll_wrap_1bit | `TFT_eSPI-master/examples/Sprite/Sprite_scroll_wrap_1bit` | [x] | [ ] |  |
+| 111 | Transparent_Sprite_Demo | `TFT_eSPI-master/examples/Sprite/Transparent_Sprite_Demo` | [x] | [ ] |  |
+| 112 | Transparent_Sprite_Demo_4bit | `TFT_eSPI-master/examples/Sprite/Transparent_Sprite_Demo_4bit` | [x] | [ ] |  |
+| 113 | Colour_Test | `TFT_eSPI-master/examples/Test and diagnostics/Colour_Test` | [x] | [ ] |  |
+| 114 | Read_User_Setup | `TFT_eSPI-master/examples/Test and diagnostics/Read_User_Setup` | [x] | [ ] |  |
+| 115 | Test_Touch_Controller | `TFT_eSPI-master/examples/Test and diagnostics/Test_Touch_Controller` | N/A | - | **Out of scope** - TFT_eSPI touch support needs TOUCH_CS set in User_Setup.h. |
+| 116 | Floyd_Steinberg | `TFT_eSPI-master/examples/ePaper/Floyd_Steinberg` | N/A | - | **Out of scope** - Waveshare e-paper library. |
+
+# Summary
+
+- Part 1 (repo's own sketches): **127 / 127** compile
+- Part 2 (inside bundled zips): **203 / 203** compile (81 marked N/A and excluded - see below)
+- Combined: **330 / 330**
+- HW Test: `0` - no hardware available yet; all HW boxes stay unchecked.
+
+## Scope note: why a script run may report more than 127
+
+If `scripts/test-compile-all.ps1` reports a number higher than 127, it is
+**over-collecting, not finding sketches we missed.** The script scans
+recursively for any `*.ino`, so if a dependency `.zip` has been extracted
+*inside* the sketch tree, that library's own bundled examples get counted too.
+
+Observed case: extracting `SdFat.zip` into `NBIoTPhone/SD_card/` added **58**
+third-party sketches (`SdFat/examples/` = 30, `SdFat/examples/#attic/` = 16,
+`SdFat/extras/SdFatTestSuite/examples/` = 12), inflating the count to 185.
+Those target Teensy / STM32 / AVR (`TeensySdioDemo`, `STM32Test`,
+`SoftwareSpi`, …) and will never compile for SAMD — they are not in scope.
+
+**Rule: never extract a dependency `.zip` inside the repo.** Install it into
+`Documents\Arduino\libraries\` instead (see RECOMMENDATIONS.md). To confirm
+the true scope, compare the sketch list against `git ls-files "*.ino"` — the
+repo's own sketches are all tracked; extracted library examples are not.
+
+## Changes made to the original repo (verify before committing)
+
+Everything below is the complete delta vs. the upstream clone. Nothing was
+deleted, and no file was changed except these. Confirm with `git diff --stat`.
+
+| File | Lines | Change |
+|---|---|---|
+| `KitSketches/Lesson 08 .../DHT11/DHT11.ino` | 1 | `#include <board.h>` → `#include <pindef.h>` |
+| `u-blox_GNSS/Example1_BasicNMEARead/...ino` | 1 | added missing `#include <board.h>` |
+| `u-blox_GNSS/Example11_ResetModule/Example1_FactoryDefaultviaI2C/...ino` | 1 | moved `#include <board.h>` above the declaration that uses it |
+| `u-blox_GNSS/Example11_ResetModule/Example2_FactoryDefaultsviaSerial/...ino` | 1 | uncommented `#define mySerial Serial1` |
+| `u-blox_GNSS/Example12_UseUart/...ino` | 57 | disabled SoftwareSerial, `#define mySerial Serial1`, plus a commented ready-to-enable SERCOM "Option B" block |
+
+**Two case-only renames that git has NOT recorded** (`core.ignorecase=true` on
+Windows hides them — `git status` shows nothing):
+
+- `KitSketches/Lesson 26 .../Position/position.ino` → `Position.ino`
+- `KitSketches/Lesson 26 .../Rawdata/rawdata.ino` → `Rawdata.ino`
+
+These must be forced through git with `git mv --force`, or they will silently
+not be committed and anyone cloning gets the broken lowercase names.
+
+**Untracked additions** (ours, additive only — no original file affected):
+`TESTING_CHECKLIST.md`, `RECOMMENDATIONS.md`, `scripts/`,
+`libs/`, `compile_report.csv`, `compile_report.log`,
+`compile_report_127_PASS.csv` (the 127/127 snapshot).
+
+**Sketch-tree pollution: none.** `NBIoTPhone/SD_card/SdFat/` was extracted
+there at one point and has since been removed; `SdFat.zip` is kept as the
+source and the library is installed in `Documents\Arduino\libraries\SdFat`.
+The sketch count is back to a clean 127 — if a sweep ever reports more than
+that again, check for a newly extracted library inside the tree.

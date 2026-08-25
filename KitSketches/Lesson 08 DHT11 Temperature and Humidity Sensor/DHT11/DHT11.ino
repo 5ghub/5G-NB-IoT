@@ -25,9 +25,12 @@
   static const int DHT_SENSOR_PIN = 2;
   DHT_nonblocking dht_sensor( DHT_SENSOR_PIN, DHT_SENSOR_TYPE );
 */
-#include <board.h>
+// DHT.h/DHT_U.h must come BEFORE board.h: DHT_U.h pulls in
+// Adafruit_Sensor.h, and board.h skips its own duplicate copy of those
+// same types only if Adafruit's header was included first.
 #include <DHT.h>
 #include <DHT_U.h>
+#include <board.h>
 
 //#define DSerial Serial
 #define DSerial SerialUSB

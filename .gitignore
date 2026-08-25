@@ -1,0 +1,8 @@
+# Generated compile reports (regenerate with scripts/test-compile-all.ps1)
+compile_report.csv
+compile_report.log
+compile_report_127_PASS.csv
+
+# Local convenience copy of dependency zips that already live beside their
+# sketches -- do not commit (~10 MB of duplicates)
+libs/

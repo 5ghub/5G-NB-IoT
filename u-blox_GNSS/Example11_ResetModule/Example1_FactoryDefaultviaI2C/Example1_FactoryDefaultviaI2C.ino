@@ -3,10 +3,10 @@
   This example shows how to reset the U-Blox module to factory defaults over I2C.
 
 */
+#include <board.h>
 
 SFE_UBLOX_GNSS myGNSS;
 
-#include <board.h>
 
 #define DSerial SerialUSB
 
