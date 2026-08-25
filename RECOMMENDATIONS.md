@@ -279,19 +279,73 @@ checklist pass is further along, so they don't get lost.
   the change. Since `board.h` is included by nearly every sketch in this
   repo, any edit to the shared library has a blast radius that's easy to
   underestimate; this one specific case is not worth a shared-library
-  rename just to fix one sketch. **Actual fix applied (root cause, in the library):** `5GHUB_Sensor.h` inside
-  `5G-NB-IoT_Arduino.zip` now wraps its duplicated typedefs/enums in
-  `#ifndef _ADAFRUIT_SENSOR_H`, so whichever header arrives first wins and the
-  second copy is skipped. `_5GHUB_SensorInterface` stays OUTSIDE the guard,
-  because the BME680/TSL25911/BNO055 classes inherit from it. `DHT11.ino` keeps
+  rename just to fix one sketch. **Actual fix applied (root cause, in the
+  library):** `5GHUB_Sensor.h` inside `5G-NB-IoT_Arduino.zip` now wraps its
+  duplicated typedefs/enums in `#ifndef _ADAFRUIT_SENSOR_H`, so when Adafruit's
+  header has already been included its copy is used and ours is skipped.
+  `_5GHUB_SensorInterface` stays OUTSIDE the guard, because the
+  BME680/TSL25911/BNO055 classes inherit from it. `DHT11.ino` keeps
   `#include <board.h>` and simply moves `DHT.h`/`DHT_U.h` above it, so Adafruit's
   include guard is defined first. Verified with no regression: 127/127 repo
   sketches and every `board.h`-using zip example still compile; DHT11 is
   25116 bytes.
-  **Lesson for next time:** when a fix could go in a shared library or in the
-  one failing sketch, check the sketch-local option first — it's usually
-  available (most `board.h` inclusion in this repo looks like habit, not a
-  hard dependency) and it can't regress anything else.
+
+  **The guard is one-directional, and the include order is load-bearing.** It
+  does *not* work "whichever header arrives first" — only Adafruit-first. All
+  three cases were compiled rather than reasoned about:
+
+  | Library | Include order in `DHT11.ino` | Result |
+  |---|---|---|
+  | original (no guard) | `DHT_U.h` before `board.h` | **FAIL** — `5GHUB_Sensor.h:61: conflicting declaration 'sensors_type_t'`, naming `Adafruit_Sensor.h:64` as the previous declaration |
+  | guarded | `DHT_U.h` before `board.h` | **PASS** — 25116 bytes |
+  | guarded | `board.h` before `DHT_U.h` | **FAIL** — `Adafruit_Sensor.h:49: redeclaration of 'SENSOR_TYPE_ACCELEROMETER'` |
+
+  Row 1 settles the design question: reordering the includes *without* the
+  guard still fails, because the original `5GHUB_Sensor.h` declares its types
+  unconditionally — there is nothing for the order to act on. The guard is what
+  creates the asymmetry that makes ordering meaningful, so the sketch-local
+  reorder is not an alternative to the library change, it is the other half of
+  it. Row 3 is why the include order in `DHT11.ino` must not be "tidied"
+  alphabetically; `DHT11` is currently the only sketch in the repo that
+  includes `board.h` alongside an Adafruit sensor header, so the constraint
+  affects exactly that one file.
+
+  **Lesson for next time:** a sketch-local fix cannot regress anything else,
+  which makes it the right thing to *try* first — but "safe" is not "correct".
+  Here the sketch-local option was not merely riskier, it was **impossible**:
+  no arrangement of includes can fix a header that defines its types
+  unconditionally. Test the cheap fix in isolation before treating it as a
+  viable alternative, and when the bug genuinely lives in the shared library,
+  fix it there and pay for it with a regression sweep (127/127 plus every
+  `board.h`-using example) rather than avoiding it.
+
+  **Known-better design, deliberately not taken.** `5GHUB_Sensor.h` could
+  *select* Adafruit's definitions rather than guard against them:
+
+  ```cpp
+  #if defined(__has_include) && __has_include(<Adafruit_Sensor.h>)
+  #  include <Adafruit_Sensor.h>
+  #else
+     /* ... 5GHUB's own copies ... */
+  #endif
+  ```
+
+  This was checked to be genuinely available here, not assumed: `__has_include`
+  compiles on the board package's pinned `arm-none-eabi-gcc 4.8.3`, and Arduino
+  fixes the include path before the final compile, so the test does not depend
+  on include order. It is better on three counts — no ordering constraint, no
+  reliance on Adafruit's private `_ADAFRUIT_SENSOR_H` macro name, and it would
+  close a latent one-definition-rule gap: `5GHUB_BNO055.cpp` and
+  `5GHUB_TSL25911.cpp` use `sensors_event_t`/`sensor_t` without including
+  Adafruit's header, so in a `DHT11` build those translation units see 5GHUB's
+  structs while the sketch sees Adafruit's. That is harmless *only* because the
+  two layouts were compared field by field and are byte-identical.
+
+  It was not adopted because it alters preprocessing for all 127
+  `board.h`-using sketches and so would require a full regression sweep, and
+  because it swaps a dependency on Adafruit's macro name for a dependency on
+  Arduino's include-path construction. Revisit it if the include-order
+  constraint ever causes a real failure, or if Adafruit renames its guard.
 - **Real bug found and fixed: two sketch folders had a case mismatch against
   their own `.ino` filename.** `Lesson 26 BNO055 .../Position/` contained
   `position.ino` (lowercase p), and `Rawdata/` contained `rawdata.ino`.
