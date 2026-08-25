@@ -144,6 +144,11 @@ The board package and `5G-NB-IoT_Arduino.zip` alone are **not** enough. All of
 the following must be installed for the full 127 to compile. Bundled `.zip`
 files are in the repo; the rest come from Library Manager.
 
+> **For exact pinned versions and a clean-room rebuild procedure, see
+> [REPRODUCING.md](REPRODUCING.md).** The table below says *which* libraries;
+> REPRODUCING.md says *which versions*, which is what actually makes the
+> 127 / 127 result repeatable on another machine.
+
 | Library | Source | Needed by |
 |---|---|---|
 | `5G-NB-IoT` | `5G-NB-IoT_Arduino.zip` (repo root) | almost every sketch (`board.h`) |
