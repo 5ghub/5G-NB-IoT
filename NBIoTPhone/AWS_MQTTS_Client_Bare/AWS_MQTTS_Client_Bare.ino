@@ -20,7 +20,7 @@
 */
 
 #include <board.h>
-#include <ArduinoJson.h>
+#include <ArduinoJson.h> //http://librarymanager/All#ArduinoJson
 
 #define ATSerial Serial1
 

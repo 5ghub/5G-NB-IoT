@@ -1,13 +1,9 @@
-# Generated compile reports (regenerate with scripts/test-compile-all.ps1)
-compile_report.csv
-compile_report.log
-compile_report_127_PASS.csv
+# Generated compile reports
+compile_report*
 
 # Local convenience copy of dependency zips that already live beside their
-# sketches -- do not commit (~10 MB of duplicates)
+# sketches -- do not commit
 libs/
 
-# Local-only checklist generator; kept out of the published repo. Each N/A row
-# in TESTING_CHECKLIST.md carries its own quoted compiler error, so the results
-# stay verifiable without it.
-scripts/build-checklist.py
+# Internal tooling, kept local
+scripts/
