@@ -16,8 +16,14 @@
 
 SFE_UBLOX_GNSS myGNSS;
 
-#include <SoftwareSerial.h>
-SoftwareSerial mySerial(10, 11); // RX, TX. Pin 10 on Uno goes to TX pin on GNSS module.
+//#include <SoftwareSerial.h>
+//SoftwareSerial mySerial(10, 11); // RX, TX. Pin 10 on Uno goes to TX pin on GNSS module.
+
+Uart mySerial2(&sercom1, MOSI, SCK, SERCOM_RX_PAD_1, UART_TX_PAD_0);
+void SERCOM1_Handler()
+{
+  mySerial2.IrqHandler();
+}
 
 long lastTime = 0; //Simple local timer. Limits amount of I2C traffic to u-blox module.
 
@@ -31,13 +37,13 @@ void setup()
   //Loop until we're in sync and then ensure it's at 38400 baud.
   do {
     Serial.println("GNSS: trying 38400 baud");
-    mySerial.begin(38400);
-    if (myGNSS.begin(mySerial) == true) break;
+    mySerial2.begin(38400);
+    if (myGNSS.begin(mySerial2) == true) break;
 
     delay(100);
     Serial.println("GNSS: trying 9600 baud");
-    mySerial.begin(9600);
-    if (myGNSS.begin(mySerial) == true) {
+    mySerial2.begin(9600);
+    if (myGNSS.begin(mySerial2) == true) {
         Serial.println("GNSS: connected at 9600 baud, switching to 38400");
         myGNSS.setSerialRate(38400);
         delay(100);

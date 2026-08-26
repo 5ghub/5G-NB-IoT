@@ -1,0 +1,9 @@
+# Generated compile reports
+compile_report*
+
+# Local convenience copy of dependency zips that already live beside their
+# sketches -- do not commit
+libs/
+
+# Internal tooling, kept local
+scripts/
